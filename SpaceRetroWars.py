@@ -2,11 +2,14 @@
 import pygame, util
 from pygame.locals import *
 from canon import Canon
+from aliens import Aliens
 from bullet import Bullet
 
 
 def game():
     pygame.init()
+
+    pygame.display.set_caption('Space Retro Wars')
 
     pygame.display.set_icon(util.load_image('LogoIcon256.jpg'))
 
@@ -15,7 +18,9 @@ def game():
 
     # Display
     # width, height = pygame.display.Info().current_w, pygame.display.Info().current_h
-    size = (800, 600)
+    aufloesungHorizontal = 800
+    aufloesungVertical = 600
+    size = (aufloesungHorizontal, aufloesungVertical)
     # optimal size: nächste beiden Zeilen auskommentieren und Zeile 16 löschen
     # size = (width, height)
     # screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
@@ -26,21 +31,18 @@ def game():
     img = pygame.transform.scale(img, (10, 10))
     Bullet.image = img
 
-    pygame.display.set_caption('Space Retro Wars')
-
     # sprite groups
+    aliens_liste = pygame.sprite.Group()
     bullets = pygame.sprite.Group()
     allSprites = pygame.sprite.Group()
 
     # assign sprite groups to sprites
     Canon.groups = allSprites
+    Aliens.groups = allSprites
     Bullet.groups = allSprites, bullets
 
     # Entities
-    # bullet = Bullet()
     canon = Canon()
-    # spriteGroup = pygame.sprite.Group()
-    # spriteGroup.add(canon)
 
     bgBlue = pygame.Surface(size)
     bgBlue = bgBlue.convert()
@@ -50,6 +52,20 @@ def game():
     # Assign Variables
     keepGoing = True
     clock = pygame.time.Clock()
+
+    anzahlAliens = 5
+    reihenAliens = 3
+
+    # Erste For Schleife definiert Anzahl der Aliens Reihen und zweite for Schleife die Anzhal der Alienschiffe in der Reihe
+    for i in range(reihenAliens):
+        for j in range(anzahlAliens):
+            aliens = Aliens()
+            # x Koordinaten
+            aliens.rect.x = aufloesungVertical/4 + j * 100
+            # y Koordinaten
+            aliens.rect.y = i * 50
+            # alien sprite zu enemy list hinzufügen
+            aliens_liste.add(aliens)
 
     # Loop
     while keepGoing:
@@ -63,8 +79,10 @@ def game():
             elif event.type == KEYDOWN:
                 if event.key == K_RIGHT:
                     canon.moveRight()
+                    #aliens.moveRight()
                 elif event.key == K_LEFT:
                     canon.moveLeft()
+                    #aliens.moveLeft()
                 elif event.key == K_UP:
                     # beim Drücken der Keyup Taste erscheint das Geschoss
                     Bullet(canon.getPosition())
@@ -77,9 +95,11 @@ def game():
                 if event.key == K_LEFT:
                     if not pressedKeys[K_RIGHT]:
                         canon.stop()
+                        #aliens.stop()
                 if event.key == K_RIGHT:
                     if not pressedKeys[K_LEFT]:
                         canon.stop()
+                        #aliens.stop()
 
         # Redisplay
         screen.blit(bgBlue, (0, 0))
