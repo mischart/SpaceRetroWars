@@ -3,7 +3,7 @@ import pygame, util
 
 class Canon(pygame.sprite.Sprite):
     def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
+        pygame.sprite.Sprite.__init__(self, self.groups)
         self.image = util.load_image('Spaceship-free-to-use-clipart-2.png')
         self.image = pygame.transform.scale(self.image, (50, 50))
         self.rect = self.image.get_rect()
@@ -15,7 +15,7 @@ class Canon(pygame.sprite.Sprite):
         self.rect.midbottom = self.screenRect.midbottom
         # self.newPos = self.rect.copy()
 
-    def update(self, spriteGroup, bullet):
+    def update(self):
         newPos = None
         if self.mode == 'moveRight':
             newPos = self.rect.move((self.speed, 0))
@@ -23,14 +23,12 @@ class Canon(pygame.sprite.Sprite):
             newPos = self.rect.move((-self.speed, 0))
 
         if newPos:
-            newLeft = newPos.left
-            newRight = newPos.right
-            areaLeft = self.screenRect.left
-            areaRight = self.screenRect.right
-
             if newPos.left >= self.screenRect.left and \
                             newPos.right <= self.screenRect.right:
                 self.rect = newPos
+
+    def getPosition(self):
+        return self.rect.midtop
 
     def moveRight(self):
         self.mode = 'moveRight'
