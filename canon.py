@@ -4,8 +4,7 @@ import pygame, util
 class Canon(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self, self.groups)
-        self.image = util.load_image('Spaceship-free-to-use-clipart-2.png')
-        self.image = pygame.transform.scale(self.image, (50, 50))
+        self.image = util.load_image('Spaceship-free-to-use-clipart-2.png', (50, 50))
         self.rect = self.image.get_rect()
         self.mode = 'stop'
         self.speed = 10

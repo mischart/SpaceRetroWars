@@ -3,7 +3,7 @@ import pygame
 
 class Bullet(pygame.sprite.Sprite):
     speed = -5
-
+    image = None
     def __init__(self, position):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.image = Bullet.image
