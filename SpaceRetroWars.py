@@ -13,9 +13,6 @@ def game():
 
     pygame.display.set_icon(util.load_image('LogoIcon256.jpg'))
 
-    pygame.mixer.music.load('data/game.mp3')
-    pygame.mixer.music.play(-1)
-
     # Display
     # width, height = pygame.display.Info().current_w, pygame.display.Info().current_h
     aufloesungHorizontal = 800
@@ -30,6 +27,13 @@ def game():
 
     img = util.load_image('Cute-spaceship-clipart-2.png', (50, 50))
     Alien.image = img
+
+    # sounds
+    pygame.mixer.music.load('data/game.mp3')
+    pygame.mixer.music.play(-1)
+    bulletSound = util.load_sound('bullet.wav')
+    destructionSound = util.load_sound('destruction.wav')
+
 
     # sprite groups
     aliens = pygame.sprite.Group()
@@ -85,6 +89,7 @@ def game():
                 elif event.key == K_UP:
                     # beim Drücken der Keyup Taste erscheint das Geschoss
                     Bullet(canon.getPosition())
+                    bulletSound.play()
                 elif event.key == K_DOWN:
                     # beim Drücken der KeyDown Taste wird das Spiel beendet
                     keepGoing = False
@@ -98,6 +103,9 @@ def game():
                     if not pressedKeys[K_LEFT]:
                         canon.stop()
 
+        # Collisions
+        for alien in pygame.sprite.groupcollide(aliens, bullets, 1, 1).keys():
+            destructionSound.play()
         # Redisplay
         screen.blit(bgBlue, (0, 0))
         allSprites.update()

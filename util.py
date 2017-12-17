@@ -17,9 +17,18 @@ def load_image(fileName, size=None):
     return image
 
 
-def load_sound(fileName):
-    pass
+class dummysound:
+    def play(self): pass
 
+def load_sound(fileName):
+    if not pygame.mixer: return dummysound()
+    fullname = os.path.join(data_dir, fileName)
+    try:
+        sound = pygame.mixer.Sound(fullname)
+        return sound
+    except pygame.error:
+        print('Warning, unable to load, %s' % fullname)
+    return dummysound()
 
 def get_screen_rect():
     screen = pygame.display.get_surface()
