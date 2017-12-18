@@ -13,7 +13,7 @@ class Alien(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.image = Alien.image
         self.rect = self.image.get_rect()
-        self.speed = 5
+        self.speed = 15
         self.screenRect = util.get_screen_rect()
 
     def update(self, lower=False):
@@ -46,3 +46,6 @@ class Alien(pygame.sprite.Sprite):
     def remove(self):
         print ("remove")
         self.kill()
+
+    def getPosition(self):
+        return self.rect.midbottom
