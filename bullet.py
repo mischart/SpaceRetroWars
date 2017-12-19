@@ -1,4 +1,4 @@
-import pygame
+import pygame, util
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -8,8 +8,7 @@ class Bullet(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.image = Bullet.image
         self.rect = self.image.get_rect(midbottom=position)
-        screen = pygame.display.get_surface()
-        self.screenRect = screen.get_rect()
+        self.screenRect = util.get_screen_rect()
 
     def update(self):
         self.rect.move_ip((0, Bullet.speed))
