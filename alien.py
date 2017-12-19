@@ -8,12 +8,13 @@ class Alien(pygame.sprite.Sprite):
     image = None
     goDown = False
     capture = False
+    alienMatrix = None
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.image = Alien.image
         self.rect = self.image.get_rect()
-        self.speed = 15
+        self.speed = 10
         self.screenRect = util.get_screen_rect()
 
     def update(self, lower=False):
@@ -52,3 +53,24 @@ class Alien(pygame.sprite.Sprite):
 
     def getPosition(self):
         return self.rect.midbottom
+
+    def kill(self):
+        for i in range(len(Alien.alienMatrix)):
+            for j in range(len(Alien.alienMatrix[i])):
+                if self is Alien.alienMatrix[i][j]:
+                    Alien.move_matrixitem_to_initial_row(i, j)
+                    break
+        pygame.sprite.Sprite.kill(self)
+
+    @classmethod
+    def move_matrixitem_to_initial_row(cls, item_row, item_column):
+        if item_row > 0:
+            item_in_lower_row = Alien.alienMatrix[item_row - 1][item_column]
+            if item_in_lower_row:
+                Alien.alienMatrix[item_row][item_column] = item_in_lower_row
+                Alien.alienMatrix[item_row - 1][item_column] = None
+                Alien.move_matrixitem_to_initial_row(item_row - 1, item_column)
+            else:
+                Alien.alienMatrix[item_row][item_column] = None
+        else:
+            Alien.alienMatrix[item_row][item_column] = None

@@ -1,10 +1,14 @@
 # Import and Initialization
-import pygame, util
+import pygame, util, random
 from pygame.locals import *
 from canon import Canon
 from alien import Alien
 from bullet import Bullet
 from bulletAlien import BulletAlien
+from AlienBullet import AlienBullet
+
+# game constants
+COUNTER_FOR_ALIEN_BULLETS = 60
 
 
 def init_game():
@@ -29,6 +33,7 @@ def init_game():
 
     img = util.load_image('bullet.png', (10, 10))
     Bullet.image = img
+    AlienBullet.image = img
 
     img = util.load_image('explosion1.png', (50, 50))
     BulletAlien.image = img
@@ -50,6 +55,7 @@ def init_game():
 
 
 def game_loop(screen, charImage, clock, bulletSound, destructionSound, font):
+    counter_for_alien_bullets = COUNTER_FOR_ALIEN_BULLETS
     punkte = 0
     leben = 3
     keepGoing = True
@@ -67,6 +73,7 @@ def game_loop(screen, charImage, clock, bulletSound, destructionSound, font):
     Alien.groups = allSprites, aliens
     Bullet.groups = allSprites, bullets
     BulletAlien.groups = allSprites, aliensBullets
+    AlienBullet.groups = allSprites, aliensBullets
 
     # Entities
     canon = Canon()
@@ -76,13 +83,14 @@ def game_loop(screen, charImage, clock, bulletSound, destructionSound, font):
 
     # def erstelleAliens():
     # Erste For Schleife definiert Anzahl der Aliens Reihen und zweite for Schleife die Anzhal der Alienschiffe in der Reihe
+    alienMatrix = [[Alien() for x in range(anzahlAliensInReihe)] for y in range(reihenAliens)]
+    Alien.alienMatrix = alienMatrix
     for i in range(reihenAliens):
         for j in range(anzahlAliensInReihe):
-            alien = Alien()
             # x Koordinaten
-            alien.rect.x = screen_size[1] / 4 + j * 100
+            alienMatrix[i][j].rect.x = screen_size[1] / 4 + j * 100
             # y Koordinaten
-            alien.rect.y = i * 50
+            alienMatrix[i][j].rect.y = i * 50
 
     # Loop
     while keepGoing:
@@ -114,6 +122,16 @@ def game_loop(screen, charImage, clock, bulletSound, destructionSound, font):
                 if event.key == K_RIGHT:
                     if not pressedKeys[K_LEFT]:
                         canon.stop()
+
+        # AlienBullets generieren
+        counter_for_alien_bullets -= 1
+        if counter_for_alien_bullets == 0:
+            # TODO COUNTER_FOR_ALIEN_BULLETS im laufe der Zeit verringern
+            counter_for_alien_bullets = COUNTER_FOR_ALIEN_BULLETS
+            shooting_alien = get_random_outer_Aliens(alienMatrix)
+            if shooting_alien:
+                AlienBullet(shooting_alien.getPosition())
+                bulletSound.play()
 
         # Collisions
         for alien in pygame.sprite.groupcollide(aliens, bullets, 1, 1).keys():
@@ -169,7 +187,17 @@ def game_loop(screen, charImage, clock, bulletSound, destructionSound, font):
         if not aliens.sprites() or leben == 0:
             print("To Do: das Spiel muss weiter gehen, wenn die ersten Reihen abgeschossen wurden")
             keepGoing = False
-            #game(punkte, leben)
+            # game(punkte, leben)
+
+
+def get_random_outer_Aliens(alienMatrix):
+    last_index = len(alienMatrix) - 1
+    last_row = alienMatrix[last_index]
+    last_row = list(filter(lambda x: x is not None, last_row))
+    if last_row:
+        return random.choice(last_row)
+    else:
+        return None
 
 
 if __name__ == '__main__':
