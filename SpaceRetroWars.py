@@ -28,11 +28,14 @@ def init_game():
     screen = pygame.display.set_mode(screen_size)
 
     # load images
-    background = util.load_image("StartScreen.jpg", screen_size)  # Hintergrund
+    startscreen = util.load_image("StartScreen.jpg", screen_size)  # Hintergrund
+    background = util.load_image("GameScreen.jpg", screen_size)  # Hintergrund
     background = background.convert()
 
     img = util.load_image('bullet.png', (10, 10))
     Bullet.image = img
+
+    img = util.load_image('bomb.png', (10, 10))
     AlienBullet.image = img
 
     img = util.load_image('explosion1.png', (50, 50))
@@ -55,11 +58,18 @@ def init_game():
 
 
 def game_loop(screen, charImage, clock, bulletSound, destructionSound, font):
+
     counter_for_alien_bullets = COUNTER_FOR_ALIEN_BULLETS
     punkte = 0
     leben = 3
     keepGoing = True
     screen_size = (screen.get_width(), screen.get_height())
+
+    # Fürs Spielende
+    endscreen = util.load_image("EndScreen.jpeg", screen_size)  # Hintergrund
+    fontgameOver = pygame.font.SysFont('SPACEBOY', 56, True, False)
+    gameOver = fontgameOver.render('Game Over', True, Color('White'))
+    imgYouWon = util.load_image('YouWon.png', (75, 100))
 
     # sprite groups
     canons = pygame.sprite.Group()
@@ -122,6 +132,9 @@ def game_loop(screen, charImage, clock, bulletSound, destructionSound, font):
                 if event.key == K_RIGHT:
                     if not pressedKeys[K_LEFT]:
                         canon.stop()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if not aliens.sprites() or leben == 0:
+                    keepGoing = False
 
         # AlienBullets generieren
         counter_for_alien_bullets -= 1
@@ -176,6 +189,15 @@ def game_loop(screen, charImage, clock, bulletSound, destructionSound, font):
         screen.blit(charImage, (0, 0))
         screen.blit(punkteText, [screen_size[0] - 300, screen_size[1] - 50])
         screen.blit(lebenText, [50, screen_size[1] - 50])
+        if leben == 0:
+            charImage = endscreen
+            screen.blit(gameOver, [screen_size[0] / 5, 10])
+            keepGoing = False
+        if not aliens.sprites():
+            charImage = endscreen
+            gameOver = fontgameOver.render('You Won', True, Color('White'))
+            Bullet.image = imgYouWon
+            screen.blit(gameOver, [screen_size[0] / 4, screen_size[1] / 3])
         allSprites.update()
         # Bewegung der Alienschiffe
         if Alien.goDown:
@@ -194,10 +216,13 @@ def game_loop(screen, charImage, clock, bulletSound, destructionSound, font):
         # Alien.capture = False
         allSprites.draw(screen)
         pygame.display.flip()
-        if not aliens.sprites() or leben == 0:
-            print("To Do: das Spiel muss weiter gehen, wenn die ersten Reihen abgeschossen wurden")
-            keepGoing = False
-            # game(punkte, leben)
+
+        # Um den Game Over Bildschirm einige Zeit aufrecht zu erhalten
+        x = 0
+        if keepGoing == False:
+            while x < 1:
+                x += 1
+                pygame.time.delay(1000)
 
 
 def get_random_outer_Aliens(alienMatrix):
@@ -208,7 +233,6 @@ def get_random_outer_Aliens(alienMatrix):
         return random.choice(last_row)
     else:
         return None
-
 
 if __name__ == '__main__':
     init_game()
