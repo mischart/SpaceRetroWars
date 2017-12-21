@@ -54,7 +54,7 @@ def init_game():
     screen.blit(startgame3, [screen_size[0] - 250, 10])
 
     # sounds
-    pygame.mixer.music.load('data/game.mp3')
+    pygame.mixer.music.load('data/Menue.mp3')
     pygame.mixer.music.play(-1)
     bulletSound = util.load_sound('bullet.wav')
     destructionSound = util.load_sound('destruction.wav')
@@ -110,7 +110,8 @@ def init_game():
             if event.type == pygame.QUIT:
                 startmenue = False
                 break
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN: #TO DO or Enter
+                pygame.mixer.music.stop()
                 background = gamescreen
                 startmenue = False
                 game_loop(screen, background, clock, bulletSound, destructionSound, font)
@@ -122,6 +123,9 @@ def init_game():
 
 
 def game_loop(screen, charImage, clock, bulletSound, destructionSound, font):
+
+    pygame.mixer.music.load('data/game.mp3')
+    pygame.mixer.music.play(-1)
 
     counter_for_alien_bullets = COUNTER_FOR_ALIEN_BULLETS
     punkte = 0
@@ -256,6 +260,7 @@ def game_loop(screen, charImage, clock, bulletSound, destructionSound, font):
         if leben == 0:
             charImage = endscreen
             screen.blit(gameOver, [screen_size[0] / 5, 10])
+            # TO DO Loop Spiel wieder neu starten
             keepGoing = False
         if not aliens.sprites():
             charImage = endscreen
