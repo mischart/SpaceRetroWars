@@ -1,3 +1,6 @@
+# -*- encodig: utf-8 -*-
+___author___ = 'Nowodworski, Kossjak'
+
 import pygame, util
 
 
