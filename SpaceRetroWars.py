@@ -121,12 +121,12 @@ def start_window_loop(clock, screen, fonts, backgrounds, bulletSound, destructio
                 # prüfen, ob sich der der Mause-Pointer innerhalb des Play-Images befindet
                 pygame.mixer.music.stop()
                 startmenue = False
-                game_loop(screen, backgrounds[1], clock, bulletSound, destructionSound, fonts[2])
                 # Set the x, y postions of the mouse click
                 #x, y = event.pos
                 #if ball.get_rect().collidepoint(x, y):
             # do swap
         pygame.display.update()
+    game_loop(screen, backgrounds[1], clock, bulletSound, destructionSound, fonts[2])
 
 
 def game_loop(screen, background, clock, bulletSound, destructionSound, game_font):
