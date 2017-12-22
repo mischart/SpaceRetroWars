@@ -19,12 +19,10 @@ def init_game():
     pygame.display.set_icon(util.load_image('LogoIcon256.jpg'))
 
     # Display
-    font = pygame.font.SysFont('SPACEBOY', 28, True, False)
-    fontStartgame = pygame.font.SysFont('SPACEBOY', 56, False, False)
-    fontStartgame2 = pygame.font.SysFont('Space Cruiser', 56, False, True)
-    startgame = fontStartgame.render('RETRO', True, Color('White'))
-    startgame2 = fontStartgame2.render('SPACE', True, Color('White'))
-    startgame3 = fontStartgame2.render('WARS', True, Color('White'))
+    fonts = []
+    fonts.append(pygame.font.SysFont('SPACEBOY', 56, False, False))
+    fonts.append(pygame.font.SysFont('Space Cruiser', 56, False, True))
+    fonts.append(pygame.font.SysFont('SPACEBOY', 28, True, False))
     # width, height = pygame.display.Info().current_w, pygame.display.Info().current_h
     aufloesungHorizontal = 800
     aufloesungVertical = 600
@@ -33,9 +31,9 @@ def init_game():
     screen = pygame.display.set_mode(screen_size)
 
     # load images
-    gamescreen = util.load_image("GameScreen.jpg", screen_size)  # Hintergrund
-    background = util.load_image("StartScreen.jpg", screen_size)  # Hintergrund
-    background = background.convert()
+    backgrounds = []
+    backgrounds.append(util.load_image("StartScreen.jpg", screen_size))  # Hintergrund
+    backgrounds.append(util.load_image("GameScreen.jpg", screen_size))  # Hintergrund
 
     img = util.load_image('bullet.png', (10, 10))
     Bullet.image = img
@@ -49,10 +47,6 @@ def init_game():
     img = util.load_image('Cute-spaceship-clipart-2.png', (50, 50))
     Alien.image = img
 
-    screen.blit(background, (0, 0))
-    screen.blit(startgame2, [10, 10])
-    screen.blit(startgame3, [screen_size[0] - 250, 10])
-
     # sounds
     pygame.mixer.music.load('data/Menue.mp3')
     pygame.mixer.music.play(-1)
@@ -62,23 +56,34 @@ def init_game():
     # Action -> Alter
     # Assign Variables
     clock = pygame.time.Clock()
+    start_window_loop(clock, screen, fonts, backgrounds, bulletSound, destructionSound)
 
+
+def start_window_loop(clock, screen, fonts, backgrounds, bulletSound, destructionSound):
+    start_window_text_1 = fonts[0].render('SPACE', True, Color('White'))
+    start_window_text_2 = fonts[0].render('WARS', True, Color('White'))
+
+    screen.blit(backgrounds[0], (0, 0))
+    screen.blit(start_window_text_1, [10, 10])
+    screen.blit(start_window_text_2, [screen.get_width() - 250, 10])
+
+    retro_color = Color('Yellow')
     startmenue = True
     farbeaendern = 0
     while startmenue:
         farbeaendern += 1
         if farbeaendern == 150:
-            startgame = fontStartgame.render('RETRO', True, Color('Red'))
+            retro_color = Color('Red')
         if farbeaendern == 300:
-            startgame = fontStartgame.render('RETRO', True, Color('Green'))
+            retro_color = Color('Green')
         if farbeaendern == 450:
-            startgame = fontStartgame.render('RETRO', True, Color('Blue '))
+            retro_color = Color('Blue')
         if farbeaendern == 600:
-            startgame = fontStartgame.render('RETRO', True, Color('Cyan'))
+            retro_color = Color('Cyan')
         if farbeaendern == 750:
-            startgame = fontStartgame.render('RETRO', True, Color('Magenta'))
+            retro_color = Color('Magenta')
         if farbeaendern == 900:
-            startgame = fontStartgame.render('RETRO', True, Color('Yellow'))
+            retro_color = Color('Yellow')
         #if farbeaendern == 1050:
             #startgame = fontStartgame.render('RETRO', True, Color('Black'))
         #if farbeaendern == 1200:
@@ -104,17 +109,19 @@ def init_game():
         #if farbeaendern == 2700:
             #startgame = fontStartgame.render('RETRO', True, Color('Khaki'))
             farbeaendern = 0
+        retro_text = fonts[1].render('RETRO', True, retro_color)
         print (farbeaendern)
-        screen.blit(startgame, [screen_size[0] / 3, screen_size[1] - 75])
+        screen.blit(retro_text, [screen.get_width() / 3, screen.get_height() - 75])
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 startmenue = False
                 break
-            if event.type == pygame.MOUSEBUTTONDOWN: #TO DO or Enter
+            if event.type == pygame.MOUSEBUTTONDOWN:  # TODO or Enter
+                # TODO: das Play-Image separat laden und dann mit playimage.get_rect().collidepoint(pygame.mouse.get_pos())
+                # prüfen, ob sich der der Mause-Pointer innerhalb des Play-Images befindet
                 pygame.mixer.music.stop()
-                background = gamescreen
                 startmenue = False
-                game_loop(screen, background, clock, bulletSound, destructionSound, font)
+                game_loop(screen, backgrounds[1], clock, bulletSound, destructionSound, fonts[2])
                 # Set the x, y postions of the mouse click
                 #x, y = event.pos
                 #if ball.get_rect().collidepoint(x, y):
@@ -122,7 +129,7 @@ def init_game():
         pygame.display.update()
 
 
-def game_loop(screen, charImage, clock, bulletSound, destructionSound, font):
+def game_loop(screen, background, clock, bulletSound, destructionSound, game_font):
 
     pygame.mixer.music.load('data/game.mp3')
     pygame.mixer.music.play(-1)
@@ -134,10 +141,12 @@ def game_loop(screen, charImage, clock, bulletSound, destructionSound, font):
     screen_size = (screen.get_width(), screen.get_height())
 
     # Fürs Spielende
+    # TODO dies muss früher geladen werden und nicht erst, nach dem das Programm gestartet wurde
     endscreen = util.load_image("EndScreen.jpeg", screen_size)  # Hintergrund
-    fontgameOver = pygame.font.SysFont('SPACEBOY', 56, True, False)
-    gameOver = fontgameOver.render('Game Over', True, Color('White'))
-    imgYouWon = util.load_image('YouWon.png', (75, 100))
+    game_over_font = pygame.font.SysFont('SPACEBOY', 56, True, False)
+    game_over_text = game_over_font.render('Game Over', True, Color('White'))
+    you_won_text = game_over_text = game_over_font.render('You Won', True, Color('White'))
+    you_won_image = util.load_image('YouWon.png', (75, 100))
 
     # sprite groups
     canons = pygame.sprite.Group()
@@ -200,6 +209,7 @@ def game_loop(screen, charImage, clock, bulletSound, destructionSound, font):
                 if event.key == K_RIGHT:
                     if not pressedKeys[K_LEFT]:
                         canon.stop()
+            # TODO: Wieso??
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if not aliens.sprites() or leben == 0:
                     keepGoing = False
@@ -220,7 +230,7 @@ def game_loop(screen, charImage, clock, bulletSound, destructionSound, font):
             destructionSound.play()
             punkte += 1
 
-        for bulletAliens in pygame.sprite.groupcollide(aliensBullets, canons, 1, 0).keys():
+        for bullet in pygame.sprite.groupcollide(aliensBullets, canons, 1, 0).keys():
             destructionSound.play()
             leben -= 1
             # keepGoing = False
@@ -230,7 +240,8 @@ def game_loop(screen, charImage, clock, bulletSound, destructionSound, font):
             #     keepGoing = False
             #     game(punkte, leben)
 
-        for alien in pygame.sprite.groupcollide(aliensBullets, bullets, 1, 1).keys():
+        # TODO jetzt bekommt der Spieler auch Punkte, wenn die Kanonen-Bullets und die kleinen Bullets zusammenstoßen
+        for bullet in pygame.sprite.groupcollide(aliensBullets, bullets, 1, 1).keys():
             destructionSound.play()
             punkte += 10
             # keepGoing = False
@@ -249,24 +260,24 @@ def game_loop(screen, charImage, clock, bulletSound, destructionSound, font):
             #     keepGoing = False
             # game(punkte, leben)
 
-        punkteText = font.render('Punkte: ' + str(punkte), True, Color('White'))
-        lebenText = font.render('Leben: ' + str(leben), True, Color('White'))
+        punkteText = game_font.render('Punkte: ' + str(punkte), True, Color('White'))
+        lebenText = game_font.render('Leben: ' + str(leben), True, Color('White'))
         # Redisplay
         # bgBlue.blit(charImage, charRect)  # This just makes it in the same location
         # and prints it the same size as the image
-        screen.blit(charImage, (0, 0))
+        screen.blit(background, (0, 0))
         screen.blit(punkteText, [screen_size[0] - 300, screen_size[1] - 50])
         screen.blit(lebenText, [50, screen_size[1] - 50])
         if leben == 0:
-            charImage = endscreen
-            screen.blit(gameOver, [screen_size[0] / 5, 10])
+            background = endscreen
+            screen.blit(game_over_text, [screen_size[0] / 5, 10])
             # TO DO Loop Spiel wieder neu starten
             keepGoing = False
         if not aliens.sprites():
-            charImage = endscreen
-            gameOver = fontgameOver.render('You Won', True, Color('White'))
-            Bullet.image = imgYouWon
-            screen.blit(gameOver, [screen_size[0] / 4, screen_size[1] / 3])
+            background = endscreen
+            # TODO wieso? Bullet.image = you_won_image
+            Bullet.image = you_won_image
+            screen.blit(you_won_text, [screen_size[0] / 4, screen_size[1] / 3])
         allSprites.update()
         # Bewegung der Alienschiffe
         if Alien.goDown:
@@ -287,8 +298,8 @@ def game_loop(screen, charImage, clock, bulletSound, destructionSound, font):
         pygame.display.flip()
 
         # Um den Game Over Bildschirm einige Zeit aufrecht zu erhalten
-        x = 0
         if keepGoing == False:
+            x = 0
             while x < 1:
                 x += 1
                 pygame.time.delay(1000)
