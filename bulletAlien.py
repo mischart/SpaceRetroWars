@@ -12,6 +12,7 @@ class BulletAlien(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.image = BulletAlien.image
+        # TODO: Ein Mal top left start und ein Mal Top right 800 600, mit etsprechender Bewegung in entgegengesetzte Richtung rect.move_ip - 12?
         self.rect = self.image.get_rect(topleft=(0, 0))
         self.screenRect = util.get_screen_rect()
 
