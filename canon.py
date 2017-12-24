@@ -9,8 +9,7 @@ class Canon(pygame.sprite.Sprite):
         self.mode = 'stop'
         self.speed = 10
 
-        screen = pygame.display.get_surface()
-        self.screenRect = screen.get_rect()
+        self.screenRect = util.get_screen_rect()
         self.rect.midbottom = self.screenRect.midbottom
         # self.newPos = self.rect.copy()
 
