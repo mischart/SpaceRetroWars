@@ -7,6 +7,7 @@ from bullet import Bullet
 from bulletAlien import BulletAlien
 from AlienBullet import AlienBullet
 from wall import Wall
+from spaceShip import SpaceShip
 
 # game constants
 COUNTER_FOR_ALIEN_BULLETS = 60
@@ -50,6 +51,9 @@ def init_game():
 
     img = util.load_image('wall.jpg', (10, 10))
     Wall.image = img
+
+    img = util.load_image('space_ship.png', (50, 50))
+    SpaceShip.image = img
 
     # sounds
     pygame.mixer.music.load('data/Menue.mp3')
@@ -166,9 +170,11 @@ def game_loop(screen, background, clock, bulletSound, destructionSound, game_fon
     BulletAlien.groups = allSprites, aliensBullets
     AlienBullet.groups = allSprites, aliensBullets
     Wall.groups = allSprites, walls
+    SpaceShip.groups = allSprites
 
     # Entities
     canon = Canon()
+    SpaceShip(-4, (700, 100))
 
     anzahlAliensInReihe = 5
     reihenAliens = 3
