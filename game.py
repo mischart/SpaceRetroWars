@@ -3,10 +3,12 @@ import pygame, util, random
 from pygame.locals import *
 from alien import Alien
 from AlienBullet import AlienBullet
+from railgun import Railgun
 from bullet import Bullet
 from bulletAlien import BulletAlien
 from canon import Canon
 from wall import Wall
+from spaceShip import SpaceShip
 import sqlite3
 import sys
 from time import strftime
@@ -122,7 +124,6 @@ class Game(State):
         self.game_fonts = game_fonts
         self.create_sprite_groups()
         self.assign_sprite_groups()
-        self.counter_for_alien_bullets = 60
 
     def cleanup(self):
         print('cleaning up Game state stuff')
@@ -130,9 +131,11 @@ class Game(State):
         self.canons.empty()
         self.aliens.empty()
         self.bullets.empty()
+        self.railguns.empty()
         self.aliensBullets.empty()
         self.allSprites.empty()
         self.walls.empty()
+        self.space_ships.empty()
 
     def startup(self):
         print('starting Game state stuff')
@@ -140,7 +143,10 @@ class Game(State):
         pygame.mixer.music.load('data/game.mp3')
         pygame.mixer.music.play(-1)
         Bullet.image = self.game_images[3]
+        Railgun.image = self.game_images[4]
         self.background = self.game_images[0]
+        self.counter_for_alien_bullets = 60
+        self.counter_for_space_ships = random.randint(200, 400)
 
         self.canon = Canon()
         # TODO: leben, punkte, als Attribute von Canon
@@ -159,12 +165,19 @@ class Game(State):
             elif event.key == K_LEFT:
                 self.canon.moveLeft()
             elif event.key == K_UP:
-                # beim Drücken der Keyup Taste erscheint das Geschoss
-                Bullet(self.canon.getPosition())
-                self.game_sounds[0].play()
+                if not self.bullets.sprites():
+                    # beim Drücken der Keyup Taste erscheint das Geschoss
+                    Bullet(self.canon.getPosition())
+                    self.game_sounds[0].play()
             elif event.key == K_DOWN:
                 # beim Drücken der KeyDown Taste wird das Spiel beendet
-                self.done = True
+                #self.done = True
+                # beim Drücken der KeyDown Taste wird Railgun abgeschossen wenn aliens da sind und Punkte mehr als 3 vorhanden sind
+                if self.aliens.sprites():
+                    if self.punkte > 3:
+                        self.game_sounds[2].play()
+                        Railgun(self.canon.getPosition())
+                        self.punkte = self.punkte - 3
         elif event.type == KEYUP:
             # if event.key in (K_LEFT, K_RIGHT):
             pressedKeys = pygame.key.get_pressed()
@@ -182,6 +195,8 @@ class Game(State):
     def update(self, screen):
         # AlienBullets generieren
         self.generate_alien_bullet()
+
+        self.generate_space_ship()
 
         # Collisions
         self.check_collisions()
@@ -210,7 +225,7 @@ class Game(State):
                 cursor.execute("INSERT INTO sw VALUES(?,?)", (str(self.punkte * self.leben), strftime("%d.%m.%Y")))
                 db.commit()
                 db.close()
-                self.game_over_setted = False
+                self.game_over_setted = True
             # TODO wieso? Bullet.image = you_won_image
             # Antwort von Oleg: Sei kreativ, sei abstrakt - nur so schafft man neue Gimmicks die auch etwas besonderes bieten und nicht die ewige 0815 Nummer! ;)
             you_won_text = self.game_fonts[0].render('You Won', True, Color('White'))
@@ -248,17 +263,21 @@ class Game(State):
         self.canons = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
+        self.railguns = pygame.sprite.Group()
         self.aliensBullets = pygame.sprite.Group()
         self.allSprites = pygame.sprite.Group()
         self.walls = pygame.sprite.Group()
+        self.space_ships = pygame.sprite.Group()
 
     def assign_sprite_groups(self):
         Canon.groups = self.allSprites, self.canons
         Alien.groups = self.allSprites, self.aliens
         Bullet.groups = self.allSprites, self.bullets
+        Railgun.groups = self.allSprites, self.railguns
         BulletAlien.groups = self.allSprites, self.aliensBullets
         AlienBullet.groups = self.allSprites, self.aliensBullets
         Wall.groups = self.allSprites, self.walls
+        SpaceShip.groups = self.allSprites, self.space_ships
 
     def create_alien_matrix(self):
         anzahlAliensInReihe = 5
@@ -302,6 +321,13 @@ class Game(State):
                 AlienBullet(shooting_alien.getPosition())
                 self.game_sounds[0].play()
 
+    def generate_space_ship(self):
+        if self.aliens.sprites():
+            self.counter_for_space_ships -= 1
+            if self.counter_for_space_ships == 0:
+                self.counter_for_space_ships = random.randint(200, 400)
+                SpaceShip(-6, util.get_screen_rect().topright)
+
     def get_random_outer_aliens(self):
         last_index = len(Alien.alienMatrix) - 1
         last_row = Alien.alienMatrix[last_index]
@@ -313,6 +339,11 @@ class Game(State):
 
     def check_collisions(self):
         for alien in pygame.sprite.groupcollide(self.aliens, self.bullets, 1, 1).keys():
+            print("Alien.spin wäre hier noch optional möglich")
+            self.game_sounds[1].play()
+            self.punkte += 1
+
+        for alien in pygame.sprite.groupcollide(self.aliens, self.railguns, 1, 0).keys():
             print("Alien.spin wäre hier noch optional möglich")
             self.game_sounds[1].play()
             self.punkte += 1
@@ -351,6 +382,9 @@ class Game(State):
         for wall in pygame.sprite.groupcollide(self.walls, self.aliensBullets, 1, 1).keys():
             self.game_sounds[1].play()
 
+        for space_ship in pygame.sprite.groupcollide(self.space_ships, self.bullets, 1, 1).keys():
+            self.game_sounds[1].play()
+            self.punkte += space_ship.points
 
 class Control:
     def __init__(self, screen_size):
@@ -434,10 +468,18 @@ def init_game():
     img = util.load_image('wall.jpg', (10, 10))
     Wall.image = img
 
+    img = util.load_image('space_ship.png', (55, 33))
+    SpaceShip.image = img
+
+    img = util.load_image('Railgun.png', (10, 50))
+    Railgun.image = img
+    game_images.append(img)
+
     # sounds
     game_sounds = []
     game_sounds.append(util.load_sound('bullet.wav'))
     game_sounds.append(util.load_sound('destruction.wav'))
+    game_sounds.append(util.load_sound('Railgun.wav'))
 
     # Action -> Alter
     # Assign Variables

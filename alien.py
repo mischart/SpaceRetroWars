@@ -14,7 +14,7 @@ class Alien(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.image = Alien.image
         self.rect = self.image.get_rect()
-        self.speed = 10
+        self.speed = 5
         self.screenRect = util.get_screen_rect()
 
     def update(self, lower=False):
