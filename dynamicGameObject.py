@@ -2,9 +2,8 @@ import pygame, gameObject, util
 
 
 class DynamicGameObject(gameObject.GameObject):
-    def __init__(self, speed, midbottom=None, xy=None):
-        pygame.sprite.Sprite.__init__(self, self.groups)
-        gameObject.GameObject.__init__(self, midbottom, xy)
+    def __init__(self, speed, midbottom=None, topright=None):
+        gameObject.GameObject.__init__(self, midbottom, topright)
         self.speed = speed
 
     def update(self):

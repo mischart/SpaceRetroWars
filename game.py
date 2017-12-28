@@ -7,6 +7,7 @@ from bullet import Bullet
 from bulletAlien import BulletAlien
 from canon import Canon
 from wall import Wall
+from spaceShip import SpaceShip
 import sqlite3
 import sys
 from time import strftime
@@ -122,7 +123,6 @@ class Game(State):
         self.game_fonts = game_fonts
         self.create_sprite_groups()
         self.assign_sprite_groups()
-        self.counter_for_alien_bullets = 60
 
     def cleanup(self):
         print('cleaning up Game state stuff')
@@ -133,6 +133,7 @@ class Game(State):
         self.aliensBullets.empty()
         self.allSprites.empty()
         self.walls.empty()
+        self.space_ships.empty()
 
     def startup(self):
         print('starting Game state stuff')
@@ -141,6 +142,8 @@ class Game(State):
         pygame.mixer.music.play(-1)
         Bullet.image = self.game_images[3]
         self.background = self.game_images[0]
+        self.counter_for_alien_bullets = 60
+        self.counter_for_space_ships = random.randint(200, 400)
 
         self.canon = Canon()
         # TODO: leben, punkte, als Attribute von Canon
@@ -183,6 +186,8 @@ class Game(State):
         # AlienBullets generieren
         self.generate_alien_bullet()
 
+        self.generate_space_ship()
+
         # Collisions
         self.check_collisions()
 
@@ -210,7 +215,7 @@ class Game(State):
                 cursor.execute("INSERT INTO sw VALUES(?,?)", (str(self.punkte * self.leben), strftime("%d.%m.%Y")))
                 db.commit()
                 db.close()
-                self.game_over_setted = False
+                self.game_over_setted = True
             # TODO wieso? Bullet.image = you_won_image
             # Antwort von Oleg: Sei kreativ, sei abstrakt - nur so schafft man neue Gimmicks die auch etwas besonderes bieten und nicht die ewige 0815 Nummer! ;)
             you_won_text = self.game_fonts[0].render('You Won', True, Color('White'))
@@ -251,6 +256,7 @@ class Game(State):
         self.aliensBullets = pygame.sprite.Group()
         self.allSprites = pygame.sprite.Group()
         self.walls = pygame.sprite.Group()
+        self.space_ships = pygame.sprite.Group()
 
     def assign_sprite_groups(self):
         Canon.groups = self.allSprites, self.canons
@@ -259,6 +265,7 @@ class Game(State):
         BulletAlien.groups = self.allSprites, self.aliensBullets
         AlienBullet.groups = self.allSprites, self.aliensBullets
         Wall.groups = self.allSprites, self.walls
+        SpaceShip.groups = self.allSprites, self.space_ships
 
     def create_alien_matrix(self):
         anzahlAliensInReihe = 5
@@ -301,6 +308,12 @@ class Game(State):
             if shooting_alien:
                 AlienBullet(shooting_alien.getPosition())
                 self.game_sounds[0].play()
+
+    def generate_space_ship(self):
+        self.counter_for_space_ships -= 1
+        if self.counter_for_space_ships == 0:
+            self.counter_for_space_ships = random.randint(200, 400)
+            SpaceShip(-6, util.get_screen_rect().topright)
 
     def get_random_outer_aliens(self):
         last_index = len(Alien.alienMatrix) - 1
@@ -351,6 +364,9 @@ class Game(State):
         for wall in pygame.sprite.groupcollide(self.walls, self.aliensBullets, 1, 1).keys():
             self.game_sounds[1].play()
 
+        for space_ship in pygame.sprite.groupcollide(self.space_ships, self.bullets, 1, 1).keys():
+            self.game_sounds[1].play()
+            self.punkte += space_ship.points
 
 class Control:
     def __init__(self, screen_size):
@@ -433,6 +449,9 @@ def init_game():
 
     img = util.load_image('wall.jpg', (10, 10))
     Wall.image = img
+
+    img = util.load_image('space_ship.png', (55, 33))
+    SpaceShip.image = img
 
     # sounds
     game_sounds = []
