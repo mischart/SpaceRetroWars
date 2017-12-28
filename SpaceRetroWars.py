@@ -1,12 +1,15 @@
 # Import and Initialization
 import pygame, util, random
 from pygame.locals import *
-from canon import Canon
 from alien import Alien
+from AlienBullet import AlienBullet
 from bullet import Bullet
 from bulletAlien import BulletAlien
-from AlienBullet import AlienBullet
+from canon import Canon
 from wall import Wall
+import sqlite3
+import sys
+from time import strftime
 
 # game constants
 COUNTER_FOR_ALIEN_BULLETS = 60
@@ -24,6 +27,7 @@ def init_game():
     fonts.append(pygame.font.SysFont('SPACEBOY', 56, False, False))
     fonts.append(pygame.font.SysFont('Space Cruiser', 56, False, True))
     fonts.append(pygame.font.SysFont('SPACEBOY', 28, True, False))
+    fonts.append(pygame.font.SysFont('SPACEBOY', 20, False, False))
     # width, height = pygame.display.Info().current_w, pygame.display.Info().current_h
     aufloesungHorizontal = 800
     aufloesungVertical = 600
@@ -64,6 +68,20 @@ def init_game():
 
 
 def start_window_loop(clock, screen, fonts, backgrounds, bulletSound, destructionSound):
+
+    # Ich habe DB Tabelle mit Hilfe des Terminals erstellt, wie im Video 1-34: Tools -> Python Console
+    # import sqlite3
+    # con = sqlite3.connect('Highscore.db')
+    # cursor = con.cursor()
+    # cursor.execute("Create table sw (punkte varchar(32), datum varchar(32))")
+    # con.commit()
+
+    # Verbindung zu der Datenbank Highscore2, Tabelle sw
+    db = sqlite3.connect('Highscore.db')
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM sw  ORDER BY -punkte")
+
+    # Start Screen Überschrift
     start_window_text_1 = fonts[0].render('SPACE', True, Color('White'))
     start_window_text_2 = fonts[0].render('WARS', True, Color('White'))
 
@@ -71,6 +89,27 @@ def start_window_loop(clock, screen, fonts, backgrounds, bulletSound, destructio
     screen.blit(start_window_text_1, [10, 10])
     screen.blit(start_window_text_2, [screen.get_width() - 250, 10])
 
+    # Highscore Anzeige
+    zeilen = 100
+
+    # Highscore Überschrift
+    start_window_highscore = fonts[3].render('Punkte   Erreicht am', True, Color('White'))
+    screen.blit(start_window_highscore, [screen.get_width() / 3, zeilen])
+
+    # Highscore wird aus den Zeilen der Tabelle sw aus der Datenbank Highscore2 herausgelesen und auf dem screen angezeigt
+    top10 = 0
+    for row in cursor:
+        top10 += 1
+        if top10 < 11:
+            highscoreText = '    '
+            for columns in range(0, 2):
+                highscoreText = highscoreText + row[columns] + '        '
+            print(highscoreText)
+            start_window_highscore = fonts[3].render(highscoreText, True, Color('White'))
+            screen.blit(start_window_highscore, [screen.get_width() / 3, 25 * columns + zeilen + 10])
+            zeilen += 25
+
+    # Retro Farbverlauf um Aufmerksamkeit zu erzwingen
     retro_color = Color('Yellow')
     startmenue = True
     farbeaendern = 0
@@ -114,13 +153,12 @@ def start_window_loop(clock, screen, fonts, backgrounds, bulletSound, destructio
             # startgame = fontStartgame.render('RETRO', True, Color('Khaki'))
             farbeaendern = 0
         retro_text = fonts[1].render('RETRO', True, retro_color)
-        print(farbeaendern)
+        #print(farbeaendern)
         screen.blit(retro_text, [screen.get_width() / 3, screen.get_height() - 75])
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                startmenue = False
-                break
-            if event.type == pygame.MOUSEBUTTONDOWN:  # TODO or Enter
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:  # TODO or Enter and close window when click on X
                 # TODO: das Play-Image separat laden und dann mit playimage.get_rect().collidepoint(pygame.mouse.get_pos())
                 # prüfen, ob sich der der Mause-Pointer innerhalb des Play-Images befindet
                 pygame.mixer.music.stop()
@@ -130,10 +168,10 @@ def start_window_loop(clock, screen, fonts, backgrounds, bulletSound, destructio
                 # if ball.get_rect().collidepoint(x, y):
                 # do swap
         pygame.display.update()
-    game_loop(screen, backgrounds[1], clock, bulletSound, destructionSound, fonts[2])
+    game_loop(screen, backgrounds[1], clock, bulletSound, destructionSound, fonts[2], db)
 
 
-def game_loop(screen, background, clock, bulletSound, destructionSound, game_font):
+def game_loop(screen, background, clock, bulletSound, destructionSound, game_font, db):
     pygame.mixer.music.load('data/game.mp3')
     pygame.mixer.music.play(-1)
 
@@ -148,7 +186,7 @@ def game_loop(screen, background, clock, bulletSound, destructionSound, game_fon
     endscreen = util.load_image("EndScreen.jpeg", screen_size)  # Hintergrund
     game_over_font = pygame.font.SysFont('SPACEBOY', 56, True, False)
     game_over_text = game_over_font.render('Game Over', True, Color('White'))
-    you_won_text = game_over_text = game_over_font.render('You Won', True, Color('White'))
+    you_won_text = game_over_font.render('You Won', True, Color('White'))
     you_won_image = util.load_image('YouWon.png', (75, 100))
 
     # sprite groups
@@ -186,6 +224,7 @@ def game_loop(screen, background, clock, bulletSound, destructionSound, game_fon
 
     create_wall()
 
+    onlyOneTimeIsEnough = 0
     # Loop
     while keepGoing:
         # Timer
@@ -236,6 +275,10 @@ def game_loop(screen, background, clock, bulletSound, destructionSound, game_fon
             print("Alien.spin wäre hier noch optional möglich")
             destructionSound.play()
             punkte += 1
+
+        for alien in pygame.sprite.groupcollide(aliens, walls, 1, 1).keys():
+            print("Alien.spin wäre hier noch optional möglich")
+            destructionSound.play()
 
         for bullet in pygame.sprite.groupcollide(aliensBullets, canons, 1, 0).keys():
             destructionSound.play()
@@ -289,14 +332,24 @@ def game_loop(screen, background, clock, bulletSound, destructionSound, game_fon
         if not aliens.sprites():
             background = endscreen
             # TODO wieso? Bullet.image = you_won_image
+            # Antwort von Oleg: Sei kreativ, sei abstrakt - nur so schafft man neue Gimmicks die auch etwas besonderes bieten und nicht die ewige 0815 Nummer! ;)
             Bullet.image = you_won_image
             screen.blit(you_won_text, [screen_size[0] / 4, screen_size[1] / 3])
+            # Highscore Eintrag
+            if onlyOneTimeIsEnough == 0:
+                cursor = db.cursor()
+                cursor.execute("INSERT INTO sw VALUES(?,?)",(str(punkte*leben), strftime("%d.%m.%Y")))
+                db.commit()
+                onlyOneTimeIsEnough = 1
+
+
         allSprites.update()
         # Bewegung der Alienschiffe
         if Alien.goDown:
             aliens.update(True)
-            aliengetPosition = (screen_size[0] / 2, 0)
-            BulletAlien(aliengetPosition)
+            #aliengetPosition = (screen_size[0] / 2, 0)
+            #BulletAlien(aliengetPosition)
+            BulletAlien()
         Alien.goDown = False
         # Beim erreichen des unteren screen Randes wird das Spiel beendet
         # if Alien.capture:
@@ -334,17 +387,17 @@ def create_wall():
     block_width = 70
     block_distance = 145
     for i in range(7):
-        Wall((x + i * 10, y - 10))
-        Wall((x + i * 10, y))
-        Wall((x + i * 10, y + 10))
+        #Wall((x + i * 10, y - 10))
+        #Wall((x + i * 10, y))
+        #Wall((x + i * 10, y + 10))
 
         Wall((x + block_width + block_distance + i * 10, y - 10))
         Wall((x + block_width + block_distance + i * 10, y))
         Wall((x + block_width + block_distance + i * 10, y + 10))
 
-        Wall((x + (block_width + block_distance) * 2 + i * 10, y - 10))
-        Wall((x + (block_width + block_distance) * 2 + i * 10, y))
-        Wall((x + (block_width + block_distance) * 2 + i * 10, y + 10))
+        #Wall((x + (block_width + block_distance) * 2 + i * 10, y - 10))
+        #Wall((x + (block_width + block_distance) * 2 + i * 10, y))
+        #Wall((x + (block_width + block_distance) * 2 + i * 10, y + 10))
 
 
 if __name__ == '__main__':
