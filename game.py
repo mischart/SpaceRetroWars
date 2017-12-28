@@ -181,14 +181,7 @@ class Game(State):
 
     def update(self, screen):
         # AlienBullets generieren
-        self.counter_for_alien_bullets -= 1
-        if self.counter_for_alien_bullets == 0:
-            # TODO COUNTER_FOR_ALIEN_BULLETS im laufe der Zeit verringern
-            self.counter_for_alien_bullets = 60
-            shooting_alien = self.get_random_outer_aliens()
-            if shooting_alien:
-                AlienBullet(shooting_alien.getPosition())
-                self.game_sounds[0].play()
+        self.generate_alien_bullet()
 
         # Collisions
         self.check_collisions()
@@ -297,6 +290,17 @@ class Game(State):
             # Wall((x + (block_width + block_distance) * 2 + i * 10, y - 10))
             # Wall((x + (block_width + block_distance) * 2 + i * 10, y))
             # Wall((x + (block_width + block_distance) * 2 + i * 10, y + 10))
+
+    def generate_alien_bullet(self):
+        # AlienBullets generieren
+        self.counter_for_alien_bullets -= 1
+        if self.counter_for_alien_bullets == 0:
+            # TODO COUNTER_FOR_ALIEN_BULLETS im laufe der Zeit verringern
+            self.counter_for_alien_bullets = 60
+            shooting_alien = self.get_random_outer_aliens()
+            if shooting_alien:
+                AlienBullet(shooting_alien.getPosition())
+                self.game_sounds[0].play()
 
     def get_random_outer_aliens(self):
         last_index = len(Alien.alienMatrix) - 1
