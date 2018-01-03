@@ -7,6 +7,7 @@ import pygame, util
 class AlienBullet(pygame.sprite.Sprite):
     speed = 8
     image = None
+    points = 2
 
     def __init__(self, position):
         pygame.sprite.Sprite.__init__(self, self.groups)

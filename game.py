@@ -136,6 +136,7 @@ class Game(State):
         self.allSprites.empty()
         self.walls.empty()
         self.space_ships.empty()
+        self.blackHoles.empty()
 
     def startup(self):
         print('starting Game state stuff')
@@ -170,14 +171,12 @@ class Game(State):
                     Bullet(self.canon.getPosition())
                     self.game_sounds[0].play()
             elif event.key == K_DOWN:
-                # beim Drücken der KeyDown Taste wird das Spiel beendet
-                #self.done = True
                 # beim Drücken der KeyDown Taste wird Railgun abgeschossen wenn aliens da sind und Punkte mehr als 3 vorhanden sind
                 if self.aliens.sprites():
-                    if self.punkte > 3:
+                    if self.punkte >= Railgun.price:
                         self.game_sounds[2].play()
                         Railgun(self.canon.getPosition())
-                        self.punkte = self.punkte - 3
+                        self.punkte = self.punkte - Railgun.price
         elif event.type == KEYUP:
             # if event.key in (K_LEFT, K_RIGHT):
             pressedKeys = pygame.key.get_pressed()
@@ -195,6 +194,7 @@ class Game(State):
     def update(self, screen):
 
         #for black hole
+        # TODO Position variieren
         startPosition = (screen.get_width() / 2, 0)
 
         # AlienBullets generieren
@@ -239,6 +239,7 @@ class Game(State):
         # Bewegung der Alienschiffe
         if Alien.goDown:
             self.aliens.update(True)
+            #TODO wieso wird BlackHole mit der Position eines zufälligen, äußeren Alien verbunden?
             shooting_alien = self.get_random_outer_aliens()
             shooting_alien_position = shooting_alien.getPosition()
             print(screen.get_height() / 1.5, screen.get_height() / 1.4, shooting_alien_position[1])
@@ -337,7 +338,7 @@ class Game(State):
             self.counter_for_space_ships -= 1
             if self.counter_for_space_ships == 0:
                 self.counter_for_space_ships = random.randint(200, 400)
-                SpaceShip(-6, util.get_screen_rect().topright)
+                SpaceShip(util.get_screen_rect().topright)
 
     def get_random_outer_aliens(self):
         last_index = len(Alien.alienMatrix) - 1
@@ -356,12 +357,12 @@ class Game(State):
         for alien in pygame.sprite.groupcollide(self.aliens, self.bullets, 1, 1).keys():
             print("Alien.spin wäre hier noch optional möglich")
             self.game_sounds[1].play()
-            self.punkte += 1
+            self.punkte += alien.points
 
         for alien in pygame.sprite.groupcollide(self.aliens, self.railguns, 1, 0).keys():
             print("Alien.spin wäre hier noch optional möglich")
             self.game_sounds[1].play()
-            self.punkte += 1
+            self.punkte += alien.points
 
         for alien in pygame.sprite.groupcollide(self.aliens, self.walls, 1, 1).keys():
             print("Alien.spin wäre hier noch optional möglich")
@@ -378,9 +379,9 @@ class Game(State):
             self.game_sounds[1].play()
 
         # TODO jetzt bekommt der Spieler auch Punkte, wenn die Kanonen-Bullets und die kleinen Bullets zusammenstoßen
-        for bullet in pygame.sprite.groupcollide(self.aliensBullets, self.bullets, 1, 1).keys():
+        for alien_bullet in pygame.sprite.groupcollide(self.aliensBullets, self.bullets, 1, 1).keys():
             self.game_sounds[1].play()
-            self.punkte += 10
+            self.punkte += alien_bullet.points
             # keepGoing = False
             # if leben == 0:
             #     keepGoing = False
@@ -408,9 +409,13 @@ class Game(State):
 
         for space_ship in pygame.sprite.groupcollide(self.space_ships, self.bullets, 1, 1).keys():
             self.game_sounds[1].play()
-            self.punkte += space_ship.points
+            self.punkte -= space_ship.points
 
         for space_ship in pygame.sprite.groupcollide(self.space_ships, self.blackHoles, 1, 0).keys():
+            self.game_sounds[1].play()
+            self.punkte -= space_ship.points
+
+        for space_ship in pygame.sprite.groupcollide(self.space_ships, self.railguns, 1, 0).keys():
             self.game_sounds[1].play()
             self.punkte -= space_ship.points
 
@@ -496,7 +501,7 @@ def init_game():
     img = util.load_image('wall.jpg', (10, 10))
     Wall.image = img
 
-    img = util.load_image('space_ship.png', (55, 33))
+    img = util.load_image('space_ship.png', (77, 55))
     SpaceShip.image = img
 
     img = util.load_image('Railgun.png', (10, 50))
