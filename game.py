@@ -3,8 +3,9 @@ import pygame, util, random
 from pygame.locals import *
 from alien import Alien
 from AlienBullet import AlienBullet
+from railgun import Railgun
 from bullet import Bullet
-from bulletAlien import BulletAlien
+from blackHole import BlackHole
 from canon import Canon
 from wall import Wall
 from spaceShip import SpaceShip
@@ -74,7 +75,7 @@ class StartMenu(State):
                 highscoreText = '    '
                 for columns in range(0, 2):
                     highscoreText = highscoreText + row[columns] + '        '
-                print(highscoreText)
+                #print(highscoreText)
                 start_window_highscore = self.fonts[3].render(highscoreText, True, Color('White'))
                 screen.blit(start_window_highscore, [screen.get_width() / 3, 25 * columns + zeilen + 10])
                 zeilen += 25
@@ -130,10 +131,12 @@ class Game(State):
         self.canons.empty()
         self.aliens.empty()
         self.bullets.empty()
+        self.railguns.empty()
         self.aliensBullets.empty()
         self.allSprites.empty()
         self.walls.empty()
         self.space_ships.empty()
+        self.blackHoles.empty()
 
     def startup(self):
         print('starting Game state stuff')
@@ -141,6 +144,7 @@ class Game(State):
         pygame.mixer.music.load('data/game.mp3')
         pygame.mixer.music.play(-1)
         Bullet.image = self.game_images[3]
+        Railgun.image = self.game_images[4]
         self.background = self.game_images[0]
         self.counter_for_alien_bullets = 60
         self.counter_for_space_ships = random.randint(200, 400)
@@ -162,12 +166,17 @@ class Game(State):
             elif event.key == K_LEFT:
                 self.canon.moveLeft()
             elif event.key == K_UP:
-                # beim Drücken der Keyup Taste erscheint das Geschoss
-                Bullet(self.canon.getPosition())
-                self.game_sounds[0].play()
+                if not self.bullets.sprites():
+                    # beim Drücken der Keyup Taste erscheint das Geschoss
+                    Bullet(self.canon.getPosition())
+                    self.game_sounds[0].play()
             elif event.key == K_DOWN:
-                # beim Drücken der KeyDown Taste wird das Spiel beendet
-                self.done = True
+                # beim Drücken der KeyDown Taste wird Railgun abgeschossen wenn aliens da sind und Punkte mehr als 3 vorhanden sind
+                if self.aliens.sprites():
+                    if self.punkte >= Railgun.price:
+                        self.game_sounds[2].play()
+                        Railgun(self.canon.getPosition())
+                        self.punkte = self.punkte - Railgun.price
         elif event.type == KEYUP:
             # if event.key in (K_LEFT, K_RIGHT):
             pressedKeys = pygame.key.get_pressed()
@@ -183,6 +192,11 @@ class Game(State):
                 self.done = True
 
     def update(self, screen):
+
+        #for black hole
+        # TODO Position variieren
+        startPosition = (screen.get_width() / 2, 0)
+
         # AlienBullets generieren
         self.generate_alien_bullet()
 
@@ -225,7 +239,14 @@ class Game(State):
         # Bewegung der Alienschiffe
         if Alien.goDown:
             self.aliens.update(True)
-            BulletAlien()
+            #TODO wieso wird BlackHole mit der Position eines zufälligen, äußeren Alien verbunden?
+            shooting_alien = self.get_random_outer_aliens()
+            shooting_alien_position = shooting_alien.getPosition()
+            print(screen.get_height() / 1.5, screen.get_height() / 1.4, shooting_alien_position[1])
+            if screen.get_height() / 1.5 < shooting_alien_position[1] and screen.get_height() / 1.4 > shooting_alien_position[1]:
+            #BlackHole(startPosition)
+                self.game_sounds[3].play()
+                BlackHole(startPosition)
         Alien.goDown = False
         # Beim erreichen des unteren screen Randes wird das Spiel beendet
         # if Alien.capture:
@@ -253,16 +274,19 @@ class Game(State):
         self.canons = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
+        self.railguns = pygame.sprite.Group()
         self.aliensBullets = pygame.sprite.Group()
         self.allSprites = pygame.sprite.Group()
         self.walls = pygame.sprite.Group()
         self.space_ships = pygame.sprite.Group()
+        self.blackHoles = pygame.sprite.Group()
 
     def assign_sprite_groups(self):
         Canon.groups = self.allSprites, self.canons
         Alien.groups = self.allSprites, self.aliens
         Bullet.groups = self.allSprites, self.bullets
-        BulletAlien.groups = self.allSprites, self.aliensBullets
+        Railgun.groups = self.allSprites, self.railguns
+        BlackHole.groups = self.allSprites, self.blackHoles
         AlienBullet.groups = self.allSprites, self.aliensBullets
         Wall.groups = self.allSprites, self.walls
         SpaceShip.groups = self.allSprites, self.space_ships
@@ -310,10 +334,11 @@ class Game(State):
                 self.game_sounds[0].play()
 
     def generate_space_ship(self):
-        self.counter_for_space_ships -= 1
-        if self.counter_for_space_ships == 0:
-            self.counter_for_space_ships = random.randint(200, 400)
-            SpaceShip(-6, util.get_screen_rect().topright)
+        if self.aliens.sprites():
+            self.counter_for_space_ships -= 1
+            if self.counter_for_space_ships == 0:
+                self.counter_for_space_ships = random.randint(200, 400)
+                SpaceShip(util.get_screen_rect().topright)
 
     def get_random_outer_aliens(self):
         last_index = len(Alien.alienMatrix) - 1
@@ -325,23 +350,38 @@ class Game(State):
             return None
 
     def check_collisions(self):
+        for canon in pygame.sprite.groupcollide(self.canons, self.blackHoles, 1, 0).keys():
+            self.game_sounds[1].play()
+            self.leben -= 3
+
         for alien in pygame.sprite.groupcollide(self.aliens, self.bullets, 1, 1).keys():
             print("Alien.spin wäre hier noch optional möglich")
             self.game_sounds[1].play()
-            self.punkte += 1
+            self.punkte += alien.points
+
+        for alien in pygame.sprite.groupcollide(self.aliens, self.railguns, 1, 0).keys():
+            print("Alien.spin wäre hier noch optional möglich")
+            self.game_sounds[1].play()
+            self.punkte += alien.points
 
         for alien in pygame.sprite.groupcollide(self.aliens, self.walls, 1, 1).keys():
             print("Alien.spin wäre hier noch optional möglich")
+            self.game_sounds[1].play()
+
+        for alien in pygame.sprite.groupcollide(self.aliens, self.blackHoles, 1, 0).keys():
             self.game_sounds[1].play()
 
         for bullet in pygame.sprite.groupcollide(self.aliensBullets, self.canons, 1, 0).keys():
             self.game_sounds[1].play()
             self.leben -= 1
 
-        # TODO jetzt bekommt der Spieler auch Punkte, wenn die Kanonen-Bullets und die kleinen Bullets zusammenstoßen
-        for bullet in pygame.sprite.groupcollide(self.aliensBullets, self.bullets, 1, 1).keys():
+        for bullet in pygame.sprite.groupcollide(self.aliensBullets, self.blackHoles, 1, 0).keys():
             self.game_sounds[1].play()
-            self.punkte += 10
+
+        # TODO jetzt bekommt der Spieler auch Punkte, wenn die Kanonen-Bullets und die kleinen Bullets zusammenstoßen
+        for alien_bullet in pygame.sprite.groupcollide(self.aliensBullets, self.bullets, 1, 1).keys():
+            self.game_sounds[1].play()
+            self.punkte += alien_bullet.points
             # keepGoing = False
             # if leben == 0:
             #     keepGoing = False
@@ -364,9 +404,20 @@ class Game(State):
         for wall in pygame.sprite.groupcollide(self.walls, self.aliensBullets, 1, 1).keys():
             self.game_sounds[1].play()
 
+        for wall in pygame.sprite.groupcollide(self.walls, self.blackHoles, 1, 0).keys():
+            self.game_sounds[1].play()
+
         for space_ship in pygame.sprite.groupcollide(self.space_ships, self.bullets, 1, 1).keys():
             self.game_sounds[1].play()
-            self.punkte += space_ship.points
+            self.punkte -= space_ship.points
+
+        for space_ship in pygame.sprite.groupcollide(self.space_ships, self.blackHoles, 1, 0).keys():
+            self.game_sounds[1].play()
+            self.punkte -= space_ship.points
+
+        for space_ship in pygame.sprite.groupcollide(self.space_ships, self.railguns, 1, 0).keys():
+            self.game_sounds[1].play()
+            self.punkte -= space_ship.points
 
 class Control:
     def __init__(self, screen_size):
@@ -441,8 +492,8 @@ def init_game():
     img = util.load_image('bomb.png', (10, 10))
     AlienBullet.image = img
 
-    img = util.load_image('explosion1.png', (50, 50))
-    BulletAlien.image = img
+    img = util.load_image('blackHole.png', (50, 50))
+    BlackHole.image = img
 
     img = util.load_image('Cute-spaceship-clipart-2.png', (50, 50))
     Alien.image = img
@@ -450,13 +501,19 @@ def init_game():
     img = util.load_image('wall.jpg', (10, 10))
     Wall.image = img
 
-    img = util.load_image('space_ship.png', (55, 33))
+    img = util.load_image('space_ship.png', (77, 55))
     SpaceShip.image = img
+
+    img = util.load_image('Railgun.png', (10, 50))
+    Railgun.image = img
+    game_images.append(img)
 
     # sounds
     game_sounds = []
     game_sounds.append(util.load_sound('bullet.wav'))
     game_sounds.append(util.load_sound('destruction.wav'))
+    game_sounds.append(util.load_sound('Railgun.wav'))
+    game_sounds.append(util.load_sound('blackHole.wav'))
 
     # Action -> Alter
     # Assign Variables
