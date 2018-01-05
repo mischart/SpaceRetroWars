@@ -1,4 +1,4 @@
-import pygame, gameObject, util
+import gameObject
 
 
 class DynamicGameObject(gameObject.GameObject):

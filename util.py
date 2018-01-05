@@ -1,4 +1,4 @@
-import os, pygame
+import os, pygame, sqlite3
 from pygame.compat import geterror
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
@@ -33,3 +33,20 @@ def load_sound(fileName):
 def get_screen_rect():
     screen = pygame.display.get_surface()
     return screen.get_rect()
+
+
+def get_highscore_results():
+    # Ich habe DB Tabelle mit Hilfe des Terminals erstellt, wie im Video 1-34: Tools -> Python Console
+    # import sqlite3
+    # con = sqlite3.connect('Highscore.db')
+    # cursor = con.cursor()
+    # cursor.execute("Create table sw (punkte varchar(32), datum varchar(32))")
+    # con.commit()
+
+    # Verbindung zu der Datenbank Highscore2, Tabelle sw
+    db = sqlite3.connect('Highscore.db')
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM sw  ORDER BY -punkte")
+    result = cursor.fetchall()
+    db.close()
+    return result
