@@ -1,119 +1,17 @@
 # Import and Initialization
-import pygame, util, random
+import pygame, util, random, sqlite3
 from pygame.locals import *
 from alien import Alien
 from AlienBullet import AlienBullet
 from railgun import Railgun
 from bullet import Bullet
+from asteroidenregen import Asteroidenregen
 from blackHole import BlackHole
 from canon import Canon
 from wall import Wall
 from spaceShip import SpaceShip
-import sqlite3
-import sys
 from time import strftime
-
-
-class State(object):
-    def __init__(self):
-        self.done = False
-        self.next = None
-        self.quit = False
-        self.previous = None
-
-
-class StartMenu(State):
-    def __init__(self, background, fonts):
-        State.__init__(self)
-        self.next = 'game'
-        self.background = background
-        self.fonts = fonts
-        self.farbeaendern = 0
-
-    def cleanup(self):
-        print('cleaning up Menu state stuff')
-        pygame.mixer.music.stop()
-
-    def startup(self):
-        print('starting Menu state stuff')
-        # TODO checken, ob man die mp3-Datei schon früher (zusammen mit den anderen Sounds) laden kann
-        pygame.mixer.music.load('data/Menue.mp3')
-        pygame.mixer.music.play(-1)
-        # Ich habe DB Tabelle mit Hilfe des Terminals erstellt, wie im Video 1-34: Tools -> Python Console
-        # import sqlite3
-        # con = sqlite3.connect('Highscore.db')
-        # cursor = con.cursor()
-        # cursor.execute("Create table sw (punkte varchar(32), datum varchar(32))")
-        # con.commit()
-
-        # Verbindung zu der Datenbank Highscore2, Tabelle sw
-        db = sqlite3.connect('Highscore.db')
-        cursor = db.cursor()
-        cursor.execute("SELECT * FROM sw  ORDER BY -punkte")
-
-        # Start Screen Überschrift
-        start_window_text_1 = self.fonts[0].render('SPACE', True, Color('White'))
-        start_window_text_2 = self.fonts[0].render('WARS', True, Color('White'))
-
-        screen = pygame.display.get_surface()
-        screen.blit(self.background, (0, 0))
-        screen.blit(start_window_text_1, [10, 10])
-        screen.blit(start_window_text_2, [screen.get_width() - 250, 10])
-
-        # Highscore Anzeige
-        zeilen = 100
-
-        # Highscore Überschrift
-        start_window_highscore = self.fonts[3].render('Punkte   Erreicht am', True, Color('White'))
-        screen.blit(start_window_highscore, [screen.get_width() / 3, zeilen])
-
-        # Highscore wird aus den Zeilen der Tabelle sw aus der Datenbank Highscore2 herausgelesen und auf dem screen angezeigt
-        top10 = 0
-        for row in cursor:
-            top10 += 1
-            if top10 < 11:
-                highscoreText = '    '
-                for columns in range(0, 2):
-                    highscoreText = highscoreText + row[columns] + '        '
-                #print(highscoreText)
-                start_window_highscore = self.fonts[3].render(highscoreText, True, Color('White'))
-                screen.blit(start_window_highscore, [screen.get_width() / 3, 25 * columns + zeilen + 10])
-                zeilen += 25
-        db.close()
-
-    def get_event(self, event):
-        if event.type == pygame.KEYDOWN:
-            print('Menu State keydown')
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            # TODO or Enter and close window when click on X
-            # TODO: das Play-Image separat laden und dann mit playimage.get_rect().collidepoint(pygame.mouse.get_pos())
-            # prüfen, ob sich der der Mause-Pointer innerhalb des Play-Images befindet
-            self.done = True
-
-    def update(self, screen):
-        self.farbeaendern += 1
-        if self.farbeaendern < 10:
-            retro_color = Color('Yellow')
-        elif self.farbeaendern < 20:
-            retro_color = Color('Red')
-        elif self.farbeaendern < 30:
-            retro_color = Color('Green')
-        elif self.farbeaendern < 40:
-            retro_color = Color('Blue')
-        elif self.farbeaendern < 50:
-            retro_color = Color('Cyan')
-        elif self.farbeaendern < 60:
-            retro_color = Color('Magenta')
-        else:
-            retro_color = Color('Yellow')
-            self.farbeaendern = 0
-
-        retro_text = self.fonts[1].render('RETRO', True, retro_color)
-        screen.blit(retro_text, [screen.get_width() / 3, screen.get_height() - 75])
-
-    def draw(self, screen):
-        pass
-
+from state import State
 
 class Game(State):
     def __init__(self, game_images, game_sounds, game_fonts):
@@ -131,20 +29,41 @@ class Game(State):
         self.canons.empty()
         self.aliens.empty()
         self.bullets.empty()
+        self.asteroiden.empty()
         self.railguns.empty()
         self.aliensBullets.empty()
         self.allSprites.empty()
         self.walls.empty()
         self.space_ships.empty()
+        self.blackHoles.empty()
 
     def startup(self):
         print('starting Game state stuff')
         # TODO checken, ob man die mp3-Datei schon früher (zusammen mit den anderen Sounds) laden kann
         pygame.mixer.music.load('data/game.mp3')
         pygame.mixer.music.play(-1)
-        Bullet.image = self.game_images[3]
-        Railgun.image = self.game_images[4]
-        self.background = self.game_images[0]
+        Bullet.image = self.game_images[4]
+        Asteroidenregen.image = self.game_images[5]
+        # Railgun.image = self.game_images[4]
+        if State.settings_dict['game_background'] == 1:
+            self.background = self.game_images[0]
+        else:
+            self.background = self.game_images[3]
+
+        #schwierigkeitsgrad = 0
+
+        if State.settings_dict['schwierigkeitsgrad'] == 5:
+            print("game.py schwierigkeitsgrad_5x5_button clicked")
+            schwierigkeitsgrad = 5
+
+        if State.settings_dict['schwierigkeitsgrad'] == 6:
+            print("game.py schwierigkeitsgrad_6x6_button clicked")
+            schwierigkeitsgrad = 6
+
+        if State.settings_dict['schwierigkeitsgrad'] == 7:
+            print("game.py schwierigkeitsgrad_7x7_button clicked")
+            schwierigkeitsgrad = 7
+
         self.counter_for_alien_bullets = 60
         self.counter_for_space_ships = random.randint(200, 400)
 
@@ -153,8 +72,9 @@ class Game(State):
         self.punkte = 0
         self.leben = 3
         self.game_over_setted = False
-        self.create_alien_matrix()
+        self.create_alien_matrix(schwierigkeitsgrad)
         self.create_wall()
+
 
     def get_event(self, event):
         if event.type == QUIT:
@@ -170,14 +90,17 @@ class Game(State):
                     Bullet(self.canon.getPosition())
                     self.game_sounds[0].play()
             elif event.key == K_DOWN:
-                # beim Drücken der KeyDown Taste wird das Spiel beendet
-                #self.done = True
                 # beim Drücken der KeyDown Taste wird Railgun abgeschossen wenn aliens da sind und Punkte mehr als 3 vorhanden sind
                 if self.aliens.sprites():
-                    if self.punkte > 3:
+                    if self.punkte >= Railgun.price:
                         self.game_sounds[2].play()
                         Railgun(self.canon.getPosition())
-                        self.punkte = self.punkte - 3
+                        self.punkte = self.punkte - Railgun.price
+            elif event.key == K_a:
+                randomPosition = random.randint(1, 800)
+                screen_width = 1*randomPosition
+                asteroid_position_height = 0
+                Asteroidenregen([screen_width,asteroid_position_height])
         elif event.type == KEYUP:
             # if event.key in (K_LEFT, K_RIGHT):
             pressedKeys = pygame.key.get_pressed()
@@ -195,6 +118,7 @@ class Game(State):
     def update(self, screen):
 
         #for black hole
+        # TODO Position variieren
         startPosition = (screen.get_width() / 2, 0)
 
         # AlienBullets generieren
@@ -226,7 +150,8 @@ class Game(State):
                 db = sqlite3.connect('Highscore.db')
                 cursor = db.cursor()
                 # Highscore Eintrag
-                cursor.execute("INSERT INTO sw VALUES(?,?)", (str(self.punkte * self.leben), strftime("%d.%m.%Y")))
+                cursor.execute("INSERT INTO sw VALUES(?,?,?)",
+                               (str(self.punkte * self.leben), strftime("%d.%m.%Y"), State.settings_dict['player_name']))
                 db.commit()
                 db.close()
                 self.game_over_setted = True
@@ -239,13 +164,15 @@ class Game(State):
         # Bewegung der Alienschiffe
         if Alien.goDown:
             self.aliens.update(True)
+            #TODO wieso wird BlackHole mit der Position eines zufälligen, äußeren Alien verbunden?
             shooting_alien = self.get_random_outer_aliens()
-            shooting_alien_position = shooting_alien.getPosition()
-            print(screen.get_height() / 1.5, screen.get_height() / 1.4, shooting_alien_position[1])
-            if screen.get_height() / 1.5 < shooting_alien_position[1] and screen.get_height() / 1.4 > shooting_alien_position[1]:
-            #BlackHole(startPosition)
-                self.game_sounds[3].play()
-                BlackHole(startPosition)
+            if self.aliens.sprites():
+                shooting_alien_position = shooting_alien.getPosition()
+                #print(screen.get_height() / 1.6, screen.get_height() / 1.4, shooting_alien_position[1])
+                if screen.get_height() / 1.6 < shooting_alien_position[1] and screen.get_height() / 1.4 > shooting_alien_position[1]:
+                #BlackHole(startPosition)
+                    self.game_sounds[3].play()
+                    BlackHole(startPosition)
         Alien.goDown = False
         # Beim erreichen des unteren screen Randes wird das Spiel beendet
         # if Alien.capture:
@@ -273,6 +200,7 @@ class Game(State):
         self.canons = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
+        self.asteroiden = pygame.sprite.Group()
         self.railguns = pygame.sprite.Group()
         self.aliensBullets = pygame.sprite.Group()
         self.allSprites = pygame.sprite.Group()
@@ -284,19 +212,21 @@ class Game(State):
         Canon.groups = self.allSprites, self.canons
         Alien.groups = self.allSprites, self.aliens
         Bullet.groups = self.allSprites, self.bullets
+        Asteroidenregen.groups = self.allSprites, self.asteroiden
         Railgun.groups = self.allSprites, self.railguns
         BlackHole.groups = self.allSprites, self.blackHoles
         AlienBullet.groups = self.allSprites, self.aliensBullets
         Wall.groups = self.allSprites, self.walls
         SpaceShip.groups = self.allSprites, self.space_ships
 
-    def create_alien_matrix(self):
-        anzahlAliensInReihe = 5
-        reihenAliens = 3
+    def create_alien_matrix(self, schwierigkeitsgrad):
+        #anzahlAliensInReihe = schwierigkeitsgrad
+        #reihenAliens = schwierigkeitsgrad
+
         # Erste For Schleife definiert Anzahl der Aliens Reihen und zweite for Schleife die Anzhal der Alienschiffe in der Reihe
-        alienMatrix = [[Alien() for x in range(anzahlAliensInReihe)] for y in range(reihenAliens)]
-        for i in range(reihenAliens):
-            for j in range(anzahlAliensInReihe):
+        alienMatrix = [[Alien() for x in range(schwierigkeitsgrad)] for y in range(schwierigkeitsgrad)]
+        for i in range(schwierigkeitsgrad):
+            for j in range(schwierigkeitsgrad):
                 # x Koordinaten
                 alienMatrix[i][j].rect.x = 600 / 4 + j * 100
                 # y Koordinaten
@@ -337,7 +267,7 @@ class Game(State):
             self.counter_for_space_ships -= 1
             if self.counter_for_space_ships == 0:
                 self.counter_for_space_ships = random.randint(200, 400)
-                SpaceShip(-6, util.get_screen_rect().topright)
+                SpaceShip(util.get_screen_rect().topright)
 
     def get_random_outer_aliens(self):
         last_index = len(Alien.alienMatrix) - 1
@@ -353,15 +283,26 @@ class Game(State):
             self.game_sounds[1].play()
             self.leben -= 3
 
+        for canon in pygame.sprite.groupcollide(self.canons, self.asteroiden, 1, 1).keys():
+            self.game_sounds[1].play()
+            self.leben -= 1
+
+        for bullets in pygame.sprite.groupcollide(self.bullets, self.asteroiden, 1, 1).keys():
+            self.game_sounds[1].play()
+
         for alien in pygame.sprite.groupcollide(self.aliens, self.bullets, 1, 1).keys():
             print("Alien.spin wäre hier noch optional möglich")
             self.game_sounds[1].play()
-            self.punkte += 1
+            self.punkte += alien.points
+
+        for alien in pygame.sprite.groupcollide(self.aliens, self.asteroiden, 1, 1).keys():
+            print("Alien.spin wäre hier noch optional möglich")
+            self.game_sounds[1].play()
 
         for alien in pygame.sprite.groupcollide(self.aliens, self.railguns, 1, 0).keys():
             print("Alien.spin wäre hier noch optional möglich")
             self.game_sounds[1].play()
-            self.punkte += 1
+            self.punkte += alien.points
 
         for alien in pygame.sprite.groupcollide(self.aliens, self.walls, 1, 1).keys():
             print("Alien.spin wäre hier noch optional möglich")
@@ -374,13 +315,16 @@ class Game(State):
             self.game_sounds[1].play()
             self.leben -= 1
 
+        for aliensBullets in pygame.sprite.groupcollide(self.aliensBullets, self.asteroiden, 1, 1).keys():
+            self.game_sounds[1].play()
+
         for bullet in pygame.sprite.groupcollide(self.aliensBullets, self.blackHoles, 1, 0).keys():
             self.game_sounds[1].play()
 
         # TODO jetzt bekommt der Spieler auch Punkte, wenn die Kanonen-Bullets und die kleinen Bullets zusammenstoßen
-        for bullet in pygame.sprite.groupcollide(self.aliensBullets, self.bullets, 1, 1).keys():
+        for alien_bullet in pygame.sprite.groupcollide(self.aliensBullets, self.bullets, 1, 1).keys():
             self.game_sounds[1].play()
-            self.punkte += 10
+            self.punkte += alien_bullet.points
             # keepGoing = False
             # if leben == 0:
             #     keepGoing = False
@@ -397,6 +341,9 @@ class Game(State):
             #     keepGoing = False
             # game(punkte, leben)
 
+        for wall in pygame.sprite.groupcollide(self.walls, self.asteroiden, 1, 1).keys():
+            self.game_sounds[1].play()
+
         for wall in pygame.sprite.groupcollide(self.walls, self.bullets, 1, 1).keys():
             self.game_sounds[1].play()
 
@@ -408,123 +355,22 @@ class Game(State):
 
         for space_ship in pygame.sprite.groupcollide(self.space_ships, self.bullets, 1, 1).keys():
             self.game_sounds[1].play()
-            self.punkte += space_ship.points
+            self.punkte -= space_ship.points
 
         for space_ship in pygame.sprite.groupcollide(self.space_ships, self.blackHoles, 1, 0).keys():
             self.game_sounds[1].play()
             self.punkte -= space_ship.points
 
-class Control:
-    def __init__(self, screen_size):
-        self.done = False
-        self.screen = pygame.display.set_mode(screen_size)
-        pygame.display.set_caption('Space Retro Wars')
-        pygame.display.set_icon(util.load_image('LogoIcon256.jpg'))
-        self.clock = pygame.time.Clock()
+        for blackHoles in pygame.sprite.groupcollide(self.blackHoles, self.asteroiden, 0, 1).keys():
+            self.game_sounds[1].play()
 
-    def setup_states(self, state_dict, start_state):
-        self.state_dict = state_dict
-        self.state_name = start_state
-        self.state = self.state_dict[self.state_name]
-        self.state.startup()
+        for space_ship in pygame.sprite.groupcollide(self.space_ships, self.railguns, 1, 0).keys():
+            self.game_sounds[1].play()
+            self.punkte -= space_ship.points
 
-    def flip_state(self):
-        self.state.done = False
-        previous, self.state_name = self.state_name, self.state.next
-        self.state.cleanup()
-        self.state = self.state_dict[self.state_name]
-        self.state.startup()
-        self.state.previous = previous
+        for railguns in pygame.sprite.groupcollide(self.railguns, self.asteroiden, 1, 1).keys():
+            self.game_sounds[1].play()
+            self.punkte -= space_ship.points
 
-    def update(self):
-        if self.state.quit:
-            self.done = True
-        elif self.state.done:
-            self.flip_state()
-        self.state.update(self.screen)
-
-    def event_loop(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.done = True
-            self.state.get_event(event)
-
-    def main_game_loop(self):
-        while not self.done:
-            self.clock.tick(30)
-            self.event_loop()
-            self.update()
-            pygame.display.flip()
-
-
-def init_game():
-    pygame.init()
-    # load fonts
-    # TODO : change Lists to Dictionaries
-    start_menu_fonts = []
-    start_menu_fonts.append(pygame.font.SysFont('SPACEBOY', 56, False, False))
-    start_menu_fonts.append(pygame.font.SysFont('Space Cruiser', 56, False, True))
-    start_menu_fonts.append(pygame.font.SysFont('SPACEBOY', 28, True, False))
-    start_menu_fonts.append(pygame.font.SysFont('SPACEBOY', 20, False, False))
-
-    game_fonts = []
-    game_fonts.append(pygame.font.SysFont('SPACEBOY', 56, True, False))
-    game_fonts.append(pygame.font.SysFont('SPACEBOY', 28, True, False))
-
-    # load images
-    screen_size = (800, 600)
-    start_menu_bg = util.load_image("StartScreen.jpg", screen_size)  # Hintergrund
-
-    game_images = []
-    game_images.append(util.load_image("GameScreen.jpg", screen_size))  # Hintergrund
-    game_images.append(util.load_image("EndScreen.jpeg", screen_size))  # Hintergrund
-    game_images.append(util.load_image('YouWon.png', (75, 100)))
-
-    img = util.load_image('bullet.png', (10, 10))
-    Bullet.image = img
-    game_images.append(img)
-
-    img = util.load_image('bomb.png', (10, 10))
-    AlienBullet.image = img
-
-    img = util.load_image('blackHole.png', (50, 50))
-    BlackHole.image = img
-
-    img = util.load_image('Cute-spaceship-clipart-2.png', (50, 50))
-    Alien.image = img
-
-    img = util.load_image('wall.jpg', (10, 10))
-    Wall.image = img
-
-    img = util.load_image('space_ship.png', (55, 33))
-    SpaceShip.image = img
-
-    img = util.load_image('Railgun.png', (10, 50))
-    Railgun.image = img
-    game_images.append(img)
-
-    # sounds
-    game_sounds = []
-    game_sounds.append(util.load_sound('bullet.wav'))
-    game_sounds.append(util.load_sound('destruction.wav'))
-    game_sounds.append(util.load_sound('Railgun.wav'))
-    game_sounds.append(util.load_sound('blackHole.wav'))
-
-    # Action -> Alter
-    # Assign Variables
-    # clock = pygame.time.Clock()
-    # start_window_loop(clock, screen, fonts, backgrounds, bulletSound, destructionSound)
-
-    app = Control(screen_size)
-    state_dict = {
-        'start_menu': StartMenu(start_menu_bg, start_menu_fonts),
-        'game': Game(game_images, game_sounds, game_fonts)
-    }
-
-    app.setup_states(state_dict, 'start_menu')
-    app.main_game_loop()
-    pygame.quit()
-
-
-if __name__ == '__main__':
-    init_game()
+        for space_ship in pygame.sprite.groupcollide(self.space_ships, self.asteroiden, 1, 1).keys():
+            self.game_sounds[1].play()

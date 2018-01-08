@@ -1,16 +1,15 @@
-import pygame, util
+import dynamicGameObject
+
+SPEED = -50
 
 
-class Railgun(pygame.sprite.Sprite):
-    speed = -50
-    image = None
-    def __init__(self, position):
-        pygame.sprite.Sprite.__init__(self, self.groups)
-        self.image = Railgun.image
-        self.rect = self.image.get_rect(midbottom=position)
-        self.screenRect = util.get_screen_rect()
+class Railgun(dynamicGameObject.DynamicGameObject):
+    price = 3
+
+    def __init__(self, midbottom):
+        dynamicGameObject.DynamicGameObject.__init__(self, SPEED, midbottom=midbottom)
 
     def update(self):
-        self.rect.move_ip((0, Railgun.speed))
+        self.rect.move_ip((0, self.speed))
         if self.rect.top <= self.screenRect.top:
             self.kill()

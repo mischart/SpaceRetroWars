@@ -16,6 +16,7 @@ class Alien(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.speed = 5
         self.screenRect = util.get_screen_rect()
+        self.points = 1
 
     def update(self, lower=False):
         if not lower:
@@ -29,6 +30,9 @@ class Alien(pygame.sprite.Sprite):
 
         if self.rect.bottom >= self.screenRect.bottom - 50:
             Alien.capture = True
+
+        if self.rect.bottom >= self.screenRect.bottom:
+            self.kill()
 
     # TODO : spin()
     def spin(self):
