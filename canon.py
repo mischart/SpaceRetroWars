@@ -1,3 +1,4 @@
+# /F20/ Das Spiel muss dem Spieler ermöglichen, am unteren Rand des Spielfeldes eine Kanone horizontal nach rechts und nach links zu steuern.
 import pygame, util
 
 

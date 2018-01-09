@@ -1,3 +1,4 @@
+# /F10/ Vor dem Spielbeginn muss dem Spieler gewährleistet werden, eine von mindestens zwei Spielumgebungen auszuwählen.
 # Import and Initialization
 import pygame, util, pygame_textinput
 from pygame.locals import *

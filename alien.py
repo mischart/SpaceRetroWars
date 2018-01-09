@@ -1,3 +1,4 @@
+# /F30/ Während des Spiels muss sich mehrere Reihen von Objekten (Aliens), die parallel zueinander angeordnet sind, horizontal von links nach rechts und zurück bewegen. Nach dem Erreichen eines Bereichs des linken bzw. des rechten Spielfeldrandes müssen die Reihen von Aliens um denselben Bereich nach unten verschoben werden.
 # -*- encodig: utf-8 -*-
 ___author___ = 'Nowodworski, Kossjak'
 
@@ -33,21 +34,6 @@ class Alien(pygame.sprite.Sprite):
 
         if self.rect.bottom >= self.screenRect.bottom:
             self.kill()
-
-    # TODO : spin()
-    def spin(self):
-        self.dizzy = 1
-        self.original = self.image
-        "spin the image"
-        center = self.rect.center
-        self.dizzy = self.dizzy + 12
-        if self.dizzy >= 360:
-            self.dizzy = 0
-            self.image = self.original
-        else:
-            rotate = pygame.transform.rotate
-            self.image = rotate(self.original, self.dizzy)
-        self.rect = self.image.get_rect(center=center)
 
     # die Klasse Sprite hat bereits eine Methode remove zum Entfernen des Sprites von  der Gruppe
     # Wir sollen die Methode nicht überschreiben
