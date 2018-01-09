@@ -192,6 +192,7 @@ class Game(State):
         if Alien.capture:
             # keepGoing = False
             self.leben -= 1
+            Alien.capture = False
         # allSprites.remove(aliens.sprites())
         # aliens.empty()
         # Alien.capture = False

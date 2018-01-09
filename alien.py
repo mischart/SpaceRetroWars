@@ -29,10 +29,8 @@ class Alien(pygame.sprite.Sprite):
             self.speed = -self.speed
             self.rect.move_ip(self.speed, 30)
 
-        if self.rect.bottom >= self.screenRect.bottom - 50:
-            Alien.capture = True
-
         if self.rect.bottom >= self.screenRect.bottom:
+            Alien.capture = True
             self.kill()
 
     # die Klasse Sprite hat bereits eine Methode remove zum Entfernen des Sprites von  der Gruppe

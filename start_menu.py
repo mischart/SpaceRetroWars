@@ -148,6 +148,7 @@ class StartMenu(State):
     def draw(self, screen):
         pass
 
+    # /F90/ Es muss möglich sein, die Liste der besten Spielergebnisse aufzurufen (lokal).
     def show_high_score(self, screen):
         # Highscore Anzeige
         zeilen = 100

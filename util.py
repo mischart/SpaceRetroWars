@@ -34,7 +34,7 @@ def get_screen_rect():
     screen = pygame.display.get_surface()
     return screen.get_rect()
 
-
+# /F90/ Es muss möglich sein, die Liste der besten Spielergebnisse aufzurufen (lokal).
 def get_highscore_results():
     # Ich habe DB Tabelle mit Hilfe des Terminals erstellt, wie im Video 1-34: Tools -> Python Console
     # import sqlite3
