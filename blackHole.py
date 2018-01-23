@@ -7,8 +7,8 @@ SPEED = 9
 
 
 class BlackHole(dynamicGameObject.DynamicGameObject):
-    def __init__(self, midbottom):
-        dynamicGameObject.DynamicGameObject.__init__(self, SPEED, midbottom=midbottom)
+    def __init__(self, position):
+        dynamicGameObject.DynamicGameObject.__init__(self, SPEED, topright=position)
 
     def update(self):
         self.rect.move_ip((0, self.speed))

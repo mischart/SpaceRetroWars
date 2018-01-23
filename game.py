@@ -6,7 +6,7 @@ from AlienBullet import AlienBullet
 from decastling import Decastling
 from bomb import Bomb
 from bullet import Bullet
-from asteroidrain import AsteroidRain
+from asteroid import Asteroid
 from blackHole import BlackHole
 from canon import Canon
 from wall import Wall
@@ -61,6 +61,8 @@ class Game(State):
         self.game_over_setted = False
         self.create_alien_matrix(State.settings_dict['degree_of_difficulty'])
         self.create_wall()
+        self.number_of_asteroids_to_do = 0
+        self.counter_for_asteroids = 0
 
     def get_event(self, event):
         if event.type == QUIT:
@@ -91,10 +93,9 @@ class Game(State):
                         self.punkte = self.punkte - Bomb.price
             elif event.key == K_a:
                 # screen_width = 1 * randomPosition
-                if self.aliens.sprites() and self.punkte >= AsteroidRain.price:
-                    x = random.randint(1, 800)
-                    AsteroidRain([x, 0])
-                    self.punkte = self.punkte - AsteroidRain.price
+                if self.aliens.sprites() and self.punkte >= Asteroid.price and not self.number_of_asteroids_to_do:
+                    self.number_of_asteroids_to_do = random.randint(5, 10)
+                    self.punkte = self.punkte - Asteroid.price
         elif event.type == KEYUP:
             # if event.key in (K_LEFT, K_RIGHT):
             pressedKeys = pygame.key.get_pressed()
@@ -111,14 +112,12 @@ class Game(State):
 
     def update(self, screen):
 
-        # for black hole
-        # TODO Position variieren
-        startPosition = (screen.get_width() / 2, 0)
-
         # AlienBullets generieren
         self.generate_alien_bullet()
 
         self.generate_space_ship()
+
+        self.update_asteroid_rain()
 
         # Collisions
         self.check_collisions()
@@ -169,7 +168,8 @@ class Game(State):
                         shooting_alien_position[1]:
                     # BlackHole(startPosition)
                     self.game_sounds[3].play()
-                    BlackHole(startPosition)
+                    x = random.randint(0, screen.get_width() - BlackHole.image.get_rect().width)
+                    BlackHole((x, 0))
         Alien.goDown = False
         # Beim erreichen der Aliens des unteren screen Randes
         if Alien.capture:
@@ -209,7 +209,7 @@ class Game(State):
         Canon.groups = self.allSprites, self.canons
         Alien.groups = self.allSprites, self.aliens
         Bullet.groups = self.allSprites, self.bullets
-        AsteroidRain.groups = self.allSprites, self.asteroiden
+        Asteroid.groups = self.allSprites, self.asteroiden
         Decastling.groups = self.allSprites, self.decastlings
         Bomb.groups = self.allSprites, self.bombs
         BlackHole.groups = self.allSprites, self.blackHoles
@@ -275,6 +275,16 @@ class Game(State):
             return random.choice(last_row)
         else:
             return None
+
+    # Generieren von Asteroidenregen
+    def update_asteroid_rain(self):
+        if self.number_of_asteroids_to_do > 0:
+            self.counter_for_asteroids -= 1
+            if self.counter_for_asteroids <= 0:
+                self.counter_for_asteroids = random.randint(0, 30)
+                x = random.randint(0, 800 - Asteroid.image.get_rect().width)
+                Asteroid([x, 0])
+                self.number_of_asteroids_to_do -= 1
 
     def check_collisions(self):
         for canon in pygame.sprite.groupcollide(self.canons, self.blackHoles, 1, 0).keys():

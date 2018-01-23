@@ -6,11 +6,11 @@ import dynamicGameObject
 SPEED = 8
 
 
-class AsteroidRain(dynamicGameObject.DynamicGameObject):
+class Asteroid(dynamicGameObject.DynamicGameObject):
     price = 4
 
     def __init__(self, position):
-        dynamicGameObject.DynamicGameObject.__init__(self, SPEED, midbottom=position)
+        dynamicGameObject.DynamicGameObject.__init__(self, SPEED, topright=position)
 
     def update(self):
         self.rect.move_ip((0, self.speed))

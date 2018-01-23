@@ -5,7 +5,7 @@ from AlienBullet import AlienBullet
 from decastling import Decastling
 from bullet import Bullet
 from bomb import Bomb
-from asteroidrain import AsteroidRain
+from asteroid import Asteroid
 from blackHole import BlackHole
 from wall import Wall
 from spaceShip import SpaceShip
@@ -100,8 +100,8 @@ def init_game():
     Bullet.image = img
     game_images.append(img)
 
-    img = util.load_image('Asteroid.png', (20, 20))
-    AsteroidRain.image = img
+    img = util.load_image('Asteroid.png', (25, 25))
+    Asteroid.image = img
 
     img = util.load_image('bullet.png', (20, 20))
     Bomb.image = img
