@@ -3,7 +3,7 @@ import dynamicGameObject
 SPEED = -50
 
 
-class Railgun(dynamicGameObject.DynamicGameObject):
+class Decastling(dynamicGameObject.DynamicGameObject):
     price = 3
 
     def __init__(self, midbottom):

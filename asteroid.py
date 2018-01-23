@@ -3,10 +3,12 @@ ___author___ = 'Nowodworski, Kossjak'
 
 import dynamicGameObject
 
-SPEED = 9
+SPEED = 8
 
 
-class BlackHole(dynamicGameObject.DynamicGameObject):
+class Asteroid(dynamicGameObject.DynamicGameObject):
+    price = 4
+
     def __init__(self, position):
         dynamicGameObject.DynamicGameObject.__init__(self, SPEED, topright=position)
 

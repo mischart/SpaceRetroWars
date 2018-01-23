@@ -1,3 +1,4 @@
+# /F70/ Ab und zu muss im oberen Bereich des Spielfeldes ein Raumschiff erscheinen, das sich horizontal von einem Spielfeldrand bis zum anderen bewegt. Wird er durch die Kanone getroffen, bekommt der Spieler eine bestimmte Anzahl von Punkten.
 import dynamicGameObject
 
 SPEED = -6

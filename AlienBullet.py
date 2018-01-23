@@ -1,4 +1,5 @@
-# -*- encodig: utf-8 -*-
+# /F50/ Die Aliens muss nach unten schießen. Wird dabei die Kanone getroffen, verliert der Spieler eines seiner Leben.
+#  -*- encodig: utf-8 -*-
 ___author___ = 'Nowodworski, Kossjak'
 
 import pygame, util

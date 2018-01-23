@@ -2,8 +2,10 @@
 import pygame, util
 from alien import Alien
 from AlienBullet import AlienBullet
-from railgun import Railgun
+from decastling import Decastling
 from bullet import Bullet
+from bomb import Bomb
+from asteroid import Asteroid
 from blackHole import BlackHole
 from wall import Wall
 from spaceShip import SpaceShip
@@ -81,6 +83,12 @@ def init_game():
     start_menu_images.append(util.load_image('GameScreen_2.jpg', (90, 90)))
     start_menu_images.append(util.load_image('Play.png', (60, 60)))
     start_menu_images.append(util.load_image('Play.png', (90, 90)))
+    start_menu_images.append(util.load_image('5x5.png', (60, 60)))
+    start_menu_images.append(util.load_image('5x5.png', (90, 90)))
+    start_menu_images.append(util.load_image('6x6.png', (60, 60)))
+    start_menu_images.append(util.load_image('6x6.png', (90, 90)))
+    start_menu_images.append(util.load_image('7x7.png', (60, 60)))
+    start_menu_images.append(util.load_image('7x7.png', (90, 90)))
 
     game_images = []
     game_images.append(util.load_image("GameScreen.jpg", screen_size))  # Hintergrund
@@ -91,6 +99,12 @@ def init_game():
     img = util.load_image('bullet.png', (10, 10))
     Bullet.image = img
     game_images.append(img)
+
+    img = util.load_image('Asteroid.png', (25, 25))
+    Asteroid.image = img
+
+    img = util.load_image('bullet.png', (20, 20))
+    Bomb.image = img
 
     img = util.load_image('bomb.png', (10, 10))
     AlienBullet.image = img
@@ -108,7 +122,7 @@ def init_game():
     SpaceShip.image = img
 
     img = util.load_image('Railgun.png', (10, 50))
-    Railgun.image = img
+    Decastling.image = img
 
     # sounds
     game_sounds = []

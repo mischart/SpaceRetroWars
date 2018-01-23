@@ -1,7 +1,9 @@
+# /F10/ Vor dem Spielbeginn muss dem Spieler gewährleistet werden, eine von mindestens zwei Spielumgebungen auszuwählen.
 class State(object):
     settings_dict = {
         'player_name': None,
-        'game_background': None
+        'game_background': None,
+        'degree_of_difficulty': None
     }
 
     def __init__(self):
