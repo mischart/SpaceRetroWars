@@ -33,12 +33,6 @@ class Alien(pygame.sprite.Sprite):
             Alien.capture = True
             self.kill()
 
-    # die Klasse Sprite hat bereits eine Methode remove zum Entfernen des Sprites von  der Gruppe
-    # Wir sollen die Methode nicht überschreiben
-    # def remove(self):
-    #     print ("remove")
-    #     self.kill()
-
     def getPosition(self):
         return self.rect.midbottom
 

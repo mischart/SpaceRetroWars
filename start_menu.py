@@ -32,9 +32,11 @@ class StartMenu(State):
         #self.play_button = Button((images[5], images[6]), (self.bg_box.x, self.bg_box.y + 270))
 
         # images[5] entspricht der Normalansicht und images[6] wenn mit der Maus darauf gezeigt wird
-        self.schwierigkeitsgrad_5x5_button = Button((images[7], images[8]), (self.bg_box.x + 220, self.bg_box.y + 200))
-        self.schwierigkeitsgrad_6x6_button = Button((images[9], images[10]), (self.bg_box.x + 310, self.bg_box.y + 200))
-        self.schwierigkeitsgrad_7x7_button = Button((images[11], images[12]), (self.bg_box.x + 400, self.bg_box.y + 200))
+        self.play_box = pygame.Rect(self.bg_box.x, self.bg_box.y + 190, 300, 130)
+        self.play_text = default_font.render('Spiel starten:', True, Color('Cyan'))
+        self.difficulty_5x5_button = Button((images[7], images[8]), (self.play_box.x + 20, self.play_box.y + 20))
+        self.difficulty_6x6_button = Button((images[9], images[10]), (self.play_box.x + 115, self.play_box.y + 20))
+        self.difficulty_7x7_button = Button((images[11], images[12]), (self.play_box.x + 210, self.play_box.y + 20))
 
     def cleanup(self):
         print('cleaning up Menu state stuff')
@@ -53,6 +55,7 @@ class StartMenu(State):
             State.settings_dict['game_background'] = 1
         else:
             State.settings_dict['game_background'] = 2
+        self.set_button_to_unfocused()
         self.screen_button_1.set_clicked(True)
         self.screen_button_2.set_clicked(False)
 
@@ -83,17 +86,17 @@ class StartMenu(State):
 
             #if self.play_button.rect.collidepoint(pygame.mouse.get_pos()):
                 #self.done = True
-            if self.schwierigkeitsgrad_5x5_button.rect.collidepoint(pygame.mouse.get_pos()):
-                print ("start_menu.py schwierigkeitsgrad_5x5_button clicked")
-                State.settings_dict['schwierigkeitsgrad'] = 5
+            if self.difficulty_5x5_button.rect.collidepoint(pygame.mouse.get_pos()):
+                print("start_menu.py difficulty_5x5_button clicked")
+                State.settings_dict['degree_of_difficulty'] = 5
                 self.done = True
-            if self.schwierigkeitsgrad_6x6_button.rect.collidepoint(pygame.mouse.get_pos()):
-                print ("start_menu.py schwierigkeitsgrad_6x6_button clicked")
-                State.settings_dict['schwierigkeitsgrad'] = 6
+            if self.difficulty_6x6_button.rect.collidepoint(pygame.mouse.get_pos()):
+                print("start_menu.py difficulty_6x6_button clicked")
+                State.settings_dict['degree_of_difficulty'] = 6
                 self.done = True
-            if self.schwierigkeitsgrad_7x7_button.rect.collidepoint(pygame.mouse.get_pos()):
-                print ("start_menu.py schwierigkeitsgrad_7x7_button clicked")
-                State.settings_dict['schwierigkeitsgrad'] = 7
+            if self.difficulty_7x7_button.rect.collidepoint(pygame.mouse.get_pos()):
+                print("start_menu.py difficulty_7x7_button clicked")
+                State.settings_dict['degree_of_difficulty'] = 7
                 self.done = True
 
         elif event.type == pygame.MOUSEMOTION:
@@ -129,13 +132,17 @@ class StartMenu(State):
             self.farbeaendern = 0
 
         retro_text = self.fonts[1].render('RETRO', True, retro_color)
-        screen.blit(retro_text, [screen.get_width() / 3, screen.get_height() - 75])
+        screen.blit(retro_text, [screen.get_width() - 510, 5])
+        # screen.blit(retro_text, [screen.get_width() / 3, screen.get_height() - 75])
 
         screen.blit(self.name_text, (self.text_input_box.x, self.text_input_box.y - 30))
         pygame.draw.rect(screen, pygame.Color('White'), self.text_input_box)
         screen.blit(self.text_input.get_surface(), (self.text_input_box.x + 4, self.text_input_box.y + 4))
         pygame.draw.rect(screen, pygame.Color('White'), self.bg_box)
         screen.blit(self.bg_text, (self.bg_box.x, self.bg_box.y - 30))
+
+        pygame.draw.rect(screen, pygame.Color('White'), self.play_box)
+        screen.blit(self.play_text, (self.play_box.x, self.play_box.y - 30))
 
         self.buttons.update()
         self.buttons.draw(screen)

@@ -3,7 +3,7 @@ class State(object):
     settings_dict = {
         'player_name': None,
         'game_background': None,
-        'schwierigkeitsgrad': None
+        'degree_of_difficulty': None
     }
 
     def __init__(self):

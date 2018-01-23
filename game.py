@@ -4,9 +4,9 @@ from pygame.locals import *
 from alien import Alien
 from AlienBullet import AlienBullet
 from decastling import Decastling
-from bombe import Bombe
+from bomb import Bomb
 from bullet import Bullet
-from asteroidenregen import Asteroidenregen
+from asteroidrain import AsteroidRain
 from blackHole import BlackHole
 from canon import Canon
 from wall import Wall
@@ -46,26 +46,10 @@ class Game(State):
         pygame.mixer.music.load('data/game.mp3')
         pygame.mixer.music.play(-1)
         Bullet.image = self.game_images[4]
-        Asteroidenregen.image = self.game_images[5]
-        Bombe.image = self.game_images[6]
         if State.settings_dict['game_background'] == 1:
             self.background = self.game_images[0]
         else:
             self.background = self.game_images[3]
-
-        # schwierigkeitsgrad = 0
-
-        if State.settings_dict['schwierigkeitsgrad'] == 5:
-            print("game.py schwierigkeitsgrad_5x5_button clicked")
-            schwierigkeitsgrad = 5
-
-        if State.settings_dict['schwierigkeitsgrad'] == 6:
-            print("game.py schwierigkeitsgrad_6x6_button clicked")
-            schwierigkeitsgrad = 6
-
-        if State.settings_dict['schwierigkeitsgrad'] == 7:
-            print("game.py schwierigkeitsgrad_7x7_button clicked")
-            schwierigkeitsgrad = 7
 
         self.counter_for_alien_bullets = 60
         self.counter_for_space_ships = random.randint(200, 400)
@@ -75,7 +59,7 @@ class Game(State):
         self.punkte = 0
         self.leben = 3
         self.game_over_setted = False
-        self.create_alien_matrix(schwierigkeitsgrad)
+        self.create_alien_matrix(State.settings_dict['degree_of_difficulty'])
         self.create_wall()
 
     def get_event(self, event):
@@ -94,23 +78,23 @@ class Game(State):
                     self.game_sounds[0].play()
             elif event.key == K_d:
                 # beim Drücken der KeyDown Taste wird Decastling durchgeführt wenn aliens da sind und Punkte mehr als 3 vorhanden sind
-                if self.aliens.sprites():
-                    if self.punkte >= Decastling.price:
-                        self.game_sounds[2].play()
-                        Decastling(self.canon.getPosition())
-                        self.punkte = self.punkte - Decastling.price
+                if self.aliens.sprites() and self.punkte >= Decastling.price:
+                    self.game_sounds[2].play()
+                    Decastling(self.canon.getPosition())
+                    self.punkte = self.punkte - Decastling.price
             elif event.key == K_b:
                 # beim Drücken der b Taste wird Bombe abgeschossen wenn aliens da sind
-                if self.aliens.sprites():
+                if self.aliens.sprites() and self.punkte >= Bomb.price:
                     if not self.bombs.sprites():
                         self.game_sounds[2].play()
-                        Bombe(self.canon.getPosition())
+                        Bomb(self.canon.getPosition())
+                        self.punkte = self.punkte - Bomb.price
             elif event.key == K_a:
-                randomPosition = random.randint(1, 800)
-                screen_width = 1 * randomPosition
-                asteroid_position_height = 0
-                if self.aliens.sprites() or self.leben >= 0:
-                    Asteroidenregen([screen_width, asteroid_position_height])
+                # screen_width = 1 * randomPosition
+                if self.aliens.sprites() and self.punkte >= AsteroidRain.price:
+                    x = random.randint(1, 800)
+                    AsteroidRain([x, 0])
+                    self.punkte = self.punkte - AsteroidRain.price
         elif event.type == KEYUP:
             # if event.key in (K_LEFT, K_RIGHT):
             pressedKeys = pygame.key.get_pressed()
@@ -162,8 +146,7 @@ class Game(State):
                 cursor = db.cursor()
                 # Highscore Eintrag
                 cursor.execute("INSERT INTO sw VALUES(?,?,?)",
-                               (
-                               str(self.punkte * self.leben), strftime("%d.%m.%Y"), State.settings_dict['player_name']))
+                               (str(self.punkte * self.leben), strftime("%d.%m.%Y"), State.settings_dict['player_name']))
                 db.commit()
                 db.close()
                 self.game_over_setted = True
@@ -226,22 +209,22 @@ class Game(State):
         Canon.groups = self.allSprites, self.canons
         Alien.groups = self.allSprites, self.aliens
         Bullet.groups = self.allSprites, self.bullets
-        Asteroidenregen.groups = self.allSprites, self.asteroiden
+        AsteroidRain.groups = self.allSprites, self.asteroiden
         Decastling.groups = self.allSprites, self.decastlings
-        Bombe.groups = self.allSprites, self.bombs
+        Bomb.groups = self.allSprites, self.bombs
         BlackHole.groups = self.allSprites, self.blackHoles
         AlienBullet.groups = self.allSprites, self.aliensBullets
         Wall.groups = self.allSprites, self.walls
         SpaceShip.groups = self.allSprites, self.space_ships
 
-    def create_alien_matrix(self, schwierigkeitsgrad):
+    def create_alien_matrix(self, degree_of_difficulty):
         # anzahlAliensInReihe = schwierigkeitsgrad
         # reihenAliens = schwierigkeitsgrad
 
         # Erste For Schleife definiert Anzahl der Aliens Reihen und zweite for Schleife die Anzhal der Alienschiffe in der Reihe
-        alienMatrix = [[Alien() for x in range(schwierigkeitsgrad)] for y in range(schwierigkeitsgrad)]
-        for i in range(schwierigkeitsgrad):
-            for j in range(schwierigkeitsgrad):
+        alienMatrix = [[Alien() for x in range(degree_of_difficulty)] for y in range(degree_of_difficulty)]
+        for i in range(degree_of_difficulty):
+            for j in range(degree_of_difficulty):
                 # x Koordinaten
                 alienMatrix[i][j].rect.x = 600 / 4 + j * 100
                 # y Koordinaten
@@ -369,10 +352,11 @@ class Game(State):
 
         for space_ship in pygame.sprite.groupcollide(self.space_ships, self.bullets, 1, 1).keys():
             self.game_sounds[1].play()
-            self.punkte -= space_ship.points
+            self.punkte += space_ship.points
 
         for space_ship in pygame.sprite.groupcollide(self.space_ships, self.bombs, 1, 1).keys():
             self.game_sounds[1].play()
+            self.punkte += space_ship.points
 
         for space_ship in pygame.sprite.groupcollide(self.space_ships, self.blackHoles, 1, 0).keys():
             self.game_sounds[1].play()

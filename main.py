@@ -4,8 +4,8 @@ from alien import Alien
 from AlienBullet import AlienBullet
 from decastling import Decastling
 from bullet import Bullet
-from bombe import Bombe
-from asteroidenregen import Asteroidenregen
+from bomb import Bomb
+from asteroidrain import AsteroidRain
 from blackHole import BlackHole
 from wall import Wall
 from spaceShip import SpaceShip
@@ -101,12 +101,10 @@ def init_game():
     game_images.append(img)
 
     img = util.load_image('Asteroid.png', (20, 20))
-    Asteroidenregen.image = img
-    game_images.append(img)
+    AsteroidRain.image = img
 
     img = util.load_image('bullet.png', (20, 20))
-    Bombe.image = img
-    game_images.append(img)
+    Bomb.image = img
 
     img = util.load_image('bomb.png', (10, 10))
     AlienBullet.image = img
