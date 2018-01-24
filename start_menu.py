@@ -38,6 +38,15 @@ class StartMenu(State):
         self.difficulty_6x6_button = Button((images[9], images[10]), (self.play_box.x + 115, self.play_box.y + 20))
         self.difficulty_7x7_button = Button((images[11], images[12]), (self.play_box.x + 210, self.play_box.y + 20))
 
+        screen_size = pygame.display.get_surface().get_size()
+        # self.bottom_menu_box = pygame.Rect(0, screen_size[1] - 60, screen_size[0], 60)
+        self.quit_button = Button((images[15], images[16]),
+                                  (screen_size[0] - 120, screen_size[1] - self.y_for_bottom_buttons))
+        self.the_bests_button = Button((images[13], images[14]),
+                                       (screen_size[0] - 270, screen_size[1] - self.y_for_bottom_buttons))
+        self.instruction_button = Button((images[17], images[18]),
+                                         (screen_size[0] - 405, screen_size[1] - self.y_for_bottom_buttons + 2))
+
     def cleanup(self):
         print('cleaning up Menu state stuff')
         pygame.mixer.music.stop()
@@ -55,9 +64,10 @@ class StartMenu(State):
             State.settings_dict['game_background'] = 1
         else:
             State.settings_dict['game_background'] = 2
-        self.set_button_to_unfocused()
+        self.set_buttons_to_unfocused(self.buttons)
         self.screen_button_1.set_clicked(True)
         self.screen_button_2.set_clicked(False)
+        self.next = 'game'
 
     def startup(self):
         print('starting Menu state stuff')
@@ -99,11 +109,21 @@ class StartMenu(State):
                 State.settings_dict['degree_of_difficulty'] = 7
                 self.done = True
 
+            if self.quit_button.rect.collidepoint(pygame.mouse.get_pos()):
+                self.done = True
+                self.quit = True
+
+            if self.the_bests_button.rect.collidepoint(pygame.mouse.get_pos()):
+                self.done = True
+                self.next = 'score_window'
+
+            if self.instruction_button.rect.collidepoint(pygame.mouse.get_pos()):
+                self.done = True
+                self.next = 'instruction_window'
+
         elif event.type == pygame.MOUSEMOTION:
-            self.set_button_to_unfocused()
-            for button in self.buttons:
-                if button.rect.collidepoint(pygame.mouse.get_pos()):
-                    button.set_focused(True)
+            self.set_buttons_to_unfocused(self.buttons)
+            self.set_buttons_to_focused(self.buttons)
 
     def get_events_to_text_input(self, events):
         self.text_input.update(events)
@@ -113,7 +133,7 @@ class StartMenu(State):
         screen.blit(self.background, (0, 0))
         screen.blit(self.start_window_text_1, [10, 10])
         screen.blit(self.start_window_text_2, [screen.get_width() - 250, 10])
-        self.show_high_score(screen)
+        #self.show_high_score(screen)
         self.farbeaendern += 1
         if self.farbeaendern < 10:
             retro_color = Color('Yellow')
@@ -144,35 +164,11 @@ class StartMenu(State):
         pygame.draw.rect(screen, pygame.Color('White'), self.play_box)
         screen.blit(self.play_text, (self.play_box.x, self.play_box.y - 30))
 
+        pygame.draw.rect(screen, pygame.Color('Black'), self.bottom_menu_box)
+
         self.buttons.update()
         self.buttons.draw(screen)
         # pygame.display.flip()
 
-    def set_button_to_unfocused(self):
-        for button in self.buttons:
-            button.set_focused(False)
-
     def draw(self, screen):
         pass
-
-    # /F90/ Es muss möglich sein, die Liste der besten Spielergebnisse aufzurufen (lokal).
-    def show_high_score(self, screen):
-        # Highscore Anzeige
-        zeilen = 100
-
-        # Highscore Überschrift
-        start_window_highscore = self.fonts[3].render('Punkte   Erreicht am   von', True, Color('White'))
-        screen.blit(start_window_highscore, [screen.get_width() / 7, zeilen])
-
-        # Highscore wird aus den Zeilen der Tabelle sw aus der Datenbank Highscore2 herausgelesen und auf dem screen angezeigt
-        top10 = 0
-        for row in self.high_score:
-            top10 += 1
-            if top10 < 11:
-                highscoreText = '    '
-                for columns in range(0, 3):
-                    highscoreText = highscoreText + row[columns] + '        '
-                # print(highscoreText)
-                start_window_highscore = self.fonts[3].render(highscoreText, True, Color('White'))
-                screen.blit(start_window_highscore, [screen.get_width() / 7, 25 * columns + zeilen + 10])
-                zeilen += 25

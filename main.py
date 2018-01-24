@@ -11,6 +11,9 @@ from wall import Wall
 from spaceShip import SpaceShip
 from game import Game
 from start_menu import StartMenu
+from score_window import ScoreWindow
+from instruction_window import InstructionWindow
+
 
 
 class Control:
@@ -66,12 +69,17 @@ def init_game():
     start_menu_fonts = []
     start_menu_fonts.append(pygame.font.SysFont('SPACEBOY', 56, False, False))
     start_menu_fonts.append(pygame.font.SysFont('Space Cruiser', 56, False, True))
-    start_menu_fonts.append(pygame.font.SysFont('SPACEBOY', 28, True, False))
+    start_menu_fonts.append(pygame.font.SysFont('SPACEBOY', 28, False, False))
     start_menu_fonts.append(pygame.font.SysFont('SPACEBOY', 20, False, False))
 
     game_fonts = []
-    game_fonts.append(pygame.font.SysFont('SPACEBOY', 56, True, False))
-    game_fonts.append(pygame.font.SysFont('SPACEBOY', 28, True, False))
+    game_fonts.append(start_menu_fonts[0])
+    game_fonts.append(start_menu_fonts[2])
+
+    score_window_fonts = []
+    score_window_fonts.append(start_menu_fonts[0])
+
+    instruction_window_fonts = score_window_fonts
 
     # load images
     screen_size = (800, 600)
@@ -89,12 +97,25 @@ def init_game():
     start_menu_images.append(util.load_image('6x6.png', (90, 90)))
     start_menu_images.append(util.load_image('7x7.png', (60, 60)))
     start_menu_images.append(util.load_image('7x7.png', (90, 90)))
+    start_menu_images.append(util.load_image('button_the_bests.png', (80, 20)))
+    start_menu_images.append(util.load_image('button_the_bests.png', (120, 30)))
+    start_menu_images.append(util.load_image('button_quit.png', (40, 20)))
+    start_menu_images.append(util.load_image('button_quit.png', (60, 30)))
+    start_menu_images.append(util.load_image('button_instruction.png', (66, 22)))
+    start_menu_images.append(util.load_image('button_instruction.png', (96, 32)))
 
     game_images = []
     game_images.append(util.load_image("GameScreen.jpg", screen_size))  # Hintergrund
     game_images.append(util.load_image("EndScreen.jpeg", screen_size))  # Hintergrund
     game_images.append(util.load_image('YouWon.png', (75, 100)))
     game_images.append(util.load_image('GameScreen_2.jpg', screen_size))
+
+    score_window_images = []
+    score_window_images.append(game_images[3])
+    score_window_images.append(util.load_image('button_back.png', (60, 20)))
+    score_window_images.append(util.load_image('button_back.png', (90, 30)))
+
+    instruction_window_images = score_window_images
 
     img = util.load_image('bullet.png', (10, 10))
     Bullet.image = img
@@ -139,7 +160,9 @@ def init_game():
     app = Control(screen_size)
     state_dict = {
         'start_menu': StartMenu(start_menu_images, start_menu_fonts),
-        'game': Game(game_images, game_sounds, game_fonts)
+        'game': Game(game_images, game_sounds, game_fonts),
+        'score_window': ScoreWindow(score_window_images, score_window_fonts),
+        'instruction_window': InstructionWindow(instruction_window_images, instruction_window_fonts)
     }
 
     app.setup_states(state_dict, 'start_menu')
