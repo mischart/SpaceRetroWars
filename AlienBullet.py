@@ -2,21 +2,19 @@
 #  -*- encodig: utf-8 -*-
 ___author___ = 'Nowodworski, Kossjak'
 
-import pygame, util
+import dynamicGameObject
+
+SPEED = 8
 
 
-class AlienBullet(pygame.sprite.Sprite):
-    speed = 8
-    image = None
+class AlienBullet(dynamicGameObject.DynamicGameObject):
+
     points = 2
 
     def __init__(self, position):
-        pygame.sprite.Sprite.__init__(self, self.groups)
-        self.image = AlienBullet.image
-        self.rect = self.image.get_rect(midbottom=position)
-        self.screenRect = util.get_screen_rect()
+        dynamicGameObject.DynamicGameObject.__init__(self, SPEED, midbottom=position)
 
     def update(self):
-        self.rect.move_ip((0, AlienBullet.speed))
+        self.rect.move_ip((0, self.speed))
         if self.rect.bottom >= self.screenRect.bottom:
             self.kill()

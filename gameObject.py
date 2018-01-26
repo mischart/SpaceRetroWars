@@ -8,6 +8,8 @@ class GameObject(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         if midbottom:
             self.rect = self.image.get_rect(midbottom=midbottom)
-        if topright:
+        elif topright:
             self.rect = self.image.get_rect(topright=topright)
+        else:
+            self.rect = self.image.get_rect()
         self.screenRect = util.get_screen_rect()

@@ -1,5 +1,6 @@
 # Import and Initialization
 import pygame, util
+from canon import Canon
 from alien import Alien
 from AlienBullet import AlienBullet
 from decastling import Decastling
@@ -117,6 +118,8 @@ def init_game():
 
     instruction_window_images = score_window_images
 
+    Canon.image = util.load_image('player.png', (50, 50))
+
     img = util.load_image('bullet.png', (10, 10))
     Bullet.image = img
     game_images.append(img)
@@ -133,7 +136,7 @@ def init_game():
     img = util.load_image('blackHole.png', (50, 50))
     BlackHole.image = img
 
-    img = util.load_image('Cute-spaceship-clipart-2.png', (50, 50))
+    img = util.load_image('alien.png', (50, 50))
     Alien.image = img
 
     img = util.load_image('wall.jpg', (10, 10))

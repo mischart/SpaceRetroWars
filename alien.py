@@ -2,21 +2,18 @@
 # -*- encodig: utf-8 -*-
 ___author___ = 'Nowodworski, Kossjak'
 
-import pygame, util
+import pygame, dynamicGameObject
+
+SPEED = 5
 
 
-class Alien(pygame.sprite.Sprite):
-    image = None
+class Alien(dynamicGameObject.DynamicGameObject):
     goDown = False
     capture = False
     alienMatrix = None
 
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self, self.groups)
-        self.image = Alien.image
-        self.rect = self.image.get_rect()
-        self.speed = 5
-        self.screenRect = util.get_screen_rect()
+    def __init__(self, position=None):
+        dynamicGameObject.DynamicGameObject.__init__(self, SPEED, midbottom=position)
         self.points = 1
 
     def update(self, lower=False):

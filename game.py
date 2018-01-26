@@ -54,10 +54,8 @@ class Game(State):
         self.counter_for_alien_bullets = 60
         self.counter_for_space_ships = random.randint(200, 400)
 
-        self.canon = Canon()
-        # TODO: leben, punkte, als Attribute von Canon
-        self.punkte = 0
-        self.leben = 3
+        self.canon = Canon(util.get_screen_rect().midbottom)
+        self.points = 0
         self.game_over_setted = False
         self.create_alien_matrix(State.settings_dict['degree_of_difficulty'])
         self.create_wall()
@@ -80,22 +78,22 @@ class Game(State):
                     self.game_sounds[0].play()
             elif event.key == K_d:
                 # beim Drücken der KeyDown Taste wird Decastling durchgeführt wenn aliens da sind und Punkte mehr als 3 vorhanden sind
-                if self.aliens.sprites() and self.punkte >= Decastling.price:
+                if self.aliens.sprites() and self.points >= Decastling.price:
                     self.game_sounds[2].play()
                     Decastling(self.canon.getPosition())
-                    self.punkte = self.punkte - Decastling.price
+                    self.points = self.points - Decastling.price
             elif event.key == K_b:
                 # beim Drücken der b Taste wird Bombe abgeschossen wenn aliens da sind
-                if self.aliens.sprites() and self.punkte >= Bomb.price:
+                if self.aliens.sprites() and self.points >= Bomb.price:
                     if not self.bombs.sprites():
                         self.game_sounds[2].play()
                         Bomb(self.canon.getPosition())
-                        self.punkte = self.punkte - Bomb.price
+                        self.points = self.points - Bomb.price
             elif event.key == K_a:
                 # screen_width = 1 * randomPosition
-                if self.aliens.sprites() and self.punkte >= Asteroid.price and not self.number_of_asteroids_to_do:
+                if self.aliens.sprites() and self.points >= Asteroid.price and not self.number_of_asteroids_to_do:
                     self.number_of_asteroids_to_do = random.randint(5, 10)
-                    self.punkte = self.punkte - Asteroid.price
+                    self.points = self.points - Asteroid.price
         elif event.type == KEYUP:
             # if event.key in (K_LEFT, K_RIGHT):
             pressedKeys = pygame.key.get_pressed()
@@ -107,7 +105,7 @@ class Game(State):
                     self.canon.stop()
         # TODO: Wieso??
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            if not self.aliens.sprites() or self.leben <= 0:
+            if not self.aliens.sprites() or self.canon.lifes <= 0:
                 self.done = True
 
     def update(self, screen):
@@ -123,15 +121,15 @@ class Game(State):
         self.check_collisions()
 
         # /F80/ Während des Spiels muss die Anzahl der Leben des Spielers sowie die Anzahl der erreichten Punkte dargestellt werden.
-        punkteText = self.game_fonts[1].render('Punkte: ' + str(self.punkte), True, Color('White'))
-        lebenText = self.game_fonts[1].render('Leben: ' + str(self.leben), True, Color('White'))
+        punkteText = self.game_fonts[1].render('Punkte: ' + str(self.points), True, Color('White'))
+        lebenText = self.game_fonts[1].render('Leben: ' + str(self.canon.lifes), True, Color('White'))
         # Redisplay
         # bgBlue.blit(charImage, charRect)  # This just makes it in the same location
         # and prints it the same size as the image
         screen.blit(self.background, (0, 0))
         screen.blit(punkteText, [screen.get_width() - 300, screen.get_height() - 50])
         screen.blit(lebenText, [50, screen.get_height() - 50])
-        if self.leben <= 0:
+        if self.canon.lifes <= 0:
             self.background = self.game_images[1]
             self.done = True
             game_over_text = self.game_fonts[0].render('Game Over', True, Color('White'))
@@ -144,8 +142,10 @@ class Game(State):
                 db = sqlite3.connect('Highscore.db')
                 cursor = db.cursor()
                 # Highscore Eintrag
+                # Punkte mit Leben multiplizieren
                 cursor.execute("INSERT INTO sw VALUES(?,?,?)",
-                               (str(self.punkte * self.leben), strftime("%d.%m.%Y"), State.settings_dict['player_name']))
+                               (str(self.points * self.canon.lifes), strftime("%d.%m.%Y"),
+                                State.settings_dict['player_name']))
                 db.commit()
                 db.close()
                 self.game_over_setted = True
@@ -174,7 +174,7 @@ class Game(State):
         # Beim erreichen der Aliens des unteren screen Randes
         if Alien.capture:
             # keepGoing = False
-            self.leben -= 1
+            self.canon.lifes -= 1
             Alien.capture = False
         # allSprites.remove(aliens.sprites())
         # aliens.empty()
@@ -183,7 +183,7 @@ class Game(State):
         pygame.display.flip()
 
         # Um den Game Over Bildschirm einige Zeit aufrecht zu erhalten
-        if self.done and self.leben <= 0:
+        if self.done and self.canon.lifes <= 0:
             x = 0
             while x < 1:
                 x += 1
@@ -289,11 +289,11 @@ class Game(State):
     def check_collisions(self):
         for canon in pygame.sprite.groupcollide(self.canons, self.blackHoles, 1, 0).keys():
             self.game_sounds[1].play()
-            self.leben -= 3
+            self.canon.lifes = 0
 
         for canon in pygame.sprite.groupcollide(self.canons, self.asteroiden, 0, 1).keys():
             self.game_sounds[1].play()
-            self.leben -= 1
+            self.canon.lifes -= 1
 
         for bullets in pygame.sprite.groupcollide(self.bullets, self.asteroiden, 1, 1).keys():
             self.game_sounds[1].play()
@@ -303,18 +303,18 @@ class Game(State):
 
         for alien in pygame.sprite.groupcollide(self.aliens, self.bullets, 1, 1).keys():
             self.game_sounds[1].play()
-            self.punkte += alien.points
+            self.points += alien.points
 
         for alien in pygame.sprite.groupcollide(self.aliens, self.bombs, 1, 0).keys():
             self.game_sounds[1].play()
-            self.punkte += alien.points
+            self.points += alien.points
 
         for alien in pygame.sprite.groupcollide(self.aliens, self.asteroiden, 1, 1).keys():
             self.game_sounds[1].play()
 
         for alien in pygame.sprite.groupcollide(self.aliens, self.decastlings, 1, 0).keys():
             self.game_sounds[1].play()
-            self.punkte += alien.points
+            self.points += alien.points
 
         for alien in pygame.sprite.groupcollide(self.aliens, self.walls, 1, 1).keys():
             self.game_sounds[1].play()
@@ -324,7 +324,7 @@ class Game(State):
 
         for bullet in pygame.sprite.groupcollide(self.aliensBullets, self.canons, 1, 0).keys():
             self.game_sounds[1].play()
-            self.leben -= 1
+            self.canon.lifes -= 1
 
         for aliensBullets in pygame.sprite.groupcollide(self.aliensBullets, self.asteroiden, 1, 1).keys():
             self.game_sounds[1].play()
@@ -338,12 +338,12 @@ class Game(State):
         # TODO jetzt bekommt der Spieler auch Punkte, wenn die Kanonen-Bullets und die kleinen Bullets zusammenstoßen
         for alien_bullet in pygame.sprite.groupcollide(self.aliensBullets, self.bullets, 1, 1).keys():
             self.game_sounds[1].play()
-            self.punkte += alien_bullet.points
+            self.points += alien_bullet.points
 
         # /F30/ Wenn eine Reihe von Aliens einen unteren Bereich des Spielfeldes erreicht, verliert der Spieler eines seiner Leben.
         for alien in pygame.sprite.groupcollide(self.aliens, self.canons, 1, 0).keys():
             self.game_sounds[1].play()
-            self.leben -= 1
+            self.canon.lifes -= 1
 
         for wall in pygame.sprite.groupcollide(self.walls, self.asteroiden, 1, 1).keys():
             self.game_sounds[1].play()
@@ -362,11 +362,11 @@ class Game(State):
 
         for space_ship in pygame.sprite.groupcollide(self.space_ships, self.bullets, 1, 1).keys():
             self.game_sounds[1].play()
-            self.punkte += space_ship.points
+            self.points += space_ship.points
 
         for space_ship in pygame.sprite.groupcollide(self.space_ships, self.bombs, 1, 1).keys():
             self.game_sounds[1].play()
-            self.punkte += space_ship.points
+            self.points += space_ship.points
 
         for space_ship in pygame.sprite.groupcollide(self.space_ships, self.blackHoles, 1, 0).keys():
             self.game_sounds[1].play()
@@ -376,7 +376,7 @@ class Game(State):
 
         for space_ship in pygame.sprite.groupcollide(self.space_ships, self.decastlings, 1, 1).keys():
             self.game_sounds[1].play()
-            self.punkte += space_ship.points
+            self.points += space_ship.points
 
         for decastlings in pygame.sprite.groupcollide(self.decastlings, self.asteroiden, 1, 1).keys():
             self.game_sounds[1].play()

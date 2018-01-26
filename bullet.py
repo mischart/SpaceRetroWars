@@ -1,16 +1,13 @@
-import pygame, util
+import dynamicGameObject
+
+SPEED = -5
 
 
-class Bullet(pygame.sprite.Sprite):
-    speed = -5
-    image = None
+class Bullet(dynamicGameObject.DynamicGameObject):
     def __init__(self, position):
-        pygame.sprite.Sprite.__init__(self, self.groups)
-        self.image = Bullet.image
-        self.rect = self.image.get_rect(midbottom=position)
-        self.screenRect = util.get_screen_rect()
+        dynamicGameObject.DynamicGameObject.__init__(self, SPEED, midbottom=position)
 
     def update(self):
-        self.rect.move_ip((0, Bullet.speed))
+        self.rect.move_ip((0, self.speed))
         if self.rect.top <= self.screenRect.top:
             self.kill()

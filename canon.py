@@ -1,18 +1,14 @@
 # /F20/ Das Spiel muss dem Spieler ermöglichen, am unteren Rand des Spielfeldes eine Kanone horizontal nach rechts und nach links zu steuern.
-import pygame, util
+import dynamicGameObject
+
+SPEED = 10
 
 
-class Canon(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self, self.groups)
-        self.image = util.load_image('Spaceship-free-to-use-clipart-2.png', (50, 50))
-        self.rect = self.image.get_rect()
+class Canon(dynamicGameObject.DynamicGameObject):
+    def __init__(self, position):
+        dynamicGameObject.DynamicGameObject.__init__(self, SPEED, midbottom=position)
         self.mode = 'stop'
-        self.speed = 10
-
-        self.screenRect = util.get_screen_rect()
-        self.rect.midbottom = self.screenRect.midbottom
-        # self.newPos = self.rect.copy()
+        self.lifes = 3
 
     def update(self):
         newPos = None
