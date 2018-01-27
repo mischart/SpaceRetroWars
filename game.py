@@ -27,6 +27,7 @@ class Game(State):
         self.buttons = pygame.sprite.Group()
         self.game_over_text = self.game_fonts[0].render('Game Over', True, Color('White'))
         self.you_won_text = self.game_fonts[0].render('You Won', True, Color('White'))
+        self.your_result_text = None
         Button.groups = self.buttons
         screen_size = pygame.display.get_surface().get_size()
         self.back_button = Button((game_images[5], game_images[6]),
@@ -148,6 +149,8 @@ class Game(State):
                 result = str(self.points * self.canon.lifes)
                 # Ergebnis, Datum und Spielername in der DB speichern
                 util.save_score_result(result, strftime("%d.%m.%Y"), State.settings_dict['player_name'])
+                text = '{} Leben x {} Punkte = {}'.format(self.canon.lifes, self.points, result)
+                self.your_result_text = self.game_fonts[1].render(text, True, Color('White'))
                 self.game_over = True
             self.allSprites.update()
             # Bewegung der Alienschiffe
@@ -180,8 +183,9 @@ class Game(State):
                 self.done = True
             # falls der Spieler gewonnen hat
             else:
-                screen.blit(self.you_won_text, [screen.get_width() / 4, screen.get_height() / 3])
+                screen.blit(self.you_won_text, (screen.get_width() / 4, screen.get_height() / 3))
                 pygame.draw.rect(screen, pygame.Color('Black'), self.bottom_menu_box)
+                screen.blit(self.your_result_text, (20, screen.get_height() - 50))
                 self.buttons.update()
                 self.buttons.draw(screen)
             self.allSprites.update()
