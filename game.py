@@ -14,6 +14,7 @@ from spaceShip import SpaceShip
 from time import strftime
 from state import State
 from button import Button
+from fire import Fire
 
 class Game(State):
     def __init__(self, game_images, game_sounds, game_fonts):
@@ -36,7 +37,7 @@ class Game(State):
 
     def cleanup(self):
         pygame.mixer.music.stop()
-        self.canons.empty()
+        # self.canons.empty()
         self.aliens.empty()
         self.bullets.empty()
         self.asteroiden.empty()
@@ -47,6 +48,7 @@ class Game(State):
         self.walls.empty()
         self.space_ships.empty()
         self.blackHoles.empty()
+        self.fires.empty()
         self.set_buttons_to_unfocused(self.buttons)
 
     def startup(self):
@@ -91,8 +93,8 @@ class Game(State):
                     self.game_sounds[2].play()
                     Decastling(self.canon.getPosition())
                     self.points = self.points - Decastling.price
-            elif event.key == K_b:
-                # beim Drücken der b Taste wird Bombe abgeschossen wenn aliens da sind
+            elif event.key == K_s:
+                # beim Drücken der s Taste wird Bombe abgeschossen wenn aliens da sind
                 if self.aliens.sprites() and self.points >= Bomb.price:
                     if not self.bombs.sprites():
                         self.game_sounds[2].play()
@@ -194,7 +196,7 @@ class Game(State):
     #     screen.fill((0, 0, 255))
 
     def create_sprite_groups(self):
-        self.canons = pygame.sprite.Group()
+        # self.canons = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
         self.asteroiden = pygame.sprite.Group()
@@ -205,9 +207,10 @@ class Game(State):
         self.walls = pygame.sprite.Group()
         self.space_ships = pygame.sprite.Group()
         self.blackHoles = pygame.sprite.Group()
+        self.fires = pygame.sprite.Group()
 
     def assign_sprite_groups(self):
-        Canon.groups = self.allSprites, self.canons
+        Canon.groups = self.allSprites  #, self.canons
         Alien.groups = self.allSprites, self.aliens
         Bullet.groups = self.allSprites, self.bullets
         Asteroid.groups = self.allSprites, self.asteroiden
@@ -217,6 +220,7 @@ class Game(State):
         AlienBullet.groups = self.allSprites, self.aliensBullets
         Wall.groups = self.allSprites, self.walls
         SpaceShip.groups = self.allSprites, self.space_ships
+        Fire.groups = self.fires, self.allSprites
 
     def create_alien_matrix(self, degree_of_difficulty):
         # anzahlAliensInReihe = schwierigkeitsgrad
@@ -297,102 +301,139 @@ class Game(State):
                 self.counter_for_asteroids = random.randint(0, 30)
                 x = random.randint(0, 800 - Asteroid.image.get_rect().width)
                 Asteroid([x, 0])
+                self.game_sounds[5].play()
                 self.number_of_asteroids_to_do -= 1
 
     def check_collisions(self):
-        for canon in pygame.sprite.groupcollide(self.canons, self.blackHoles, 1, 0).keys():
+        # for canon in pygame.sprite.groupcollide(self.canons, self.blackHoles, 1, 0).keys():
+        for black_hole in pygame.sprite.spritecollide(self.canon, self.blackHoles, 0):
             self.game_sounds[1].play()
+            self.game_sounds[4].play()
             self.canon.lifes = 0
+            Fire(self.canon.rect.center)
 
-        for canon in pygame.sprite.groupcollide(self.canons, self.asteroiden, 0, 1).keys():
+        # for canon in pygame.sprite.groupcollide(self.canons, self.asteroiden, 0, 1).keys():
+        for asteroid in pygame.sprite.spritecollide(self.canon, self.asteroiden, 1):
             self.game_sounds[1].play()
+            self.game_sounds[4].play()
             self.canon.lifes -= 1
+            Fire(self.canon.rect.center)
 
-        for bullets in pygame.sprite.groupcollide(self.bullets, self.asteroiden, 1, 1).keys():
+        for bullet in pygame.sprite.groupcollide(self.bullets, self.asteroiden, 1, 1).keys():
             self.game_sounds[1].play()
+            Fire(bullet.rect.center)
 
-        for bombs in pygame.sprite.groupcollide(self.bombs, self.asteroiden, 1, 1).keys():
+        for bomb in pygame.sprite.groupcollide(self.bombs, self.asteroiden, 1, 1).keys():
             self.game_sounds[1].play()
+            Fire(bomb.rect.center)
 
         for alien in pygame.sprite.groupcollide(self.aliens, self.bullets, 1, 1).keys():
             self.game_sounds[1].play()
             self.points += alien.points
+            Fire(alien.rect.center)
 
         for alien in pygame.sprite.groupcollide(self.aliens, self.bombs, 1, 0).keys():
             self.game_sounds[1].play()
             self.points += alien.points
+            Fire(alien.rect.center)
 
         for alien in pygame.sprite.groupcollide(self.aliens, self.asteroiden, 1, 1).keys():
             self.game_sounds[1].play()
+            Fire(alien.rect.center)
 
         for alien in pygame.sprite.groupcollide(self.aliens, self.decastlings, 1, 0).keys():
             self.game_sounds[1].play()
             self.points += alien.points
+            Fire(alien.rect.center)
 
         for alien in pygame.sprite.groupcollide(self.aliens, self.walls, 1, 1).keys():
             self.game_sounds[1].play()
+            Fire(alien.rect.center)
 
         for alien in pygame.sprite.groupcollide(self.aliens, self.blackHoles, 1, 0).keys():
             self.game_sounds[1].play()
+            Fire(alien.rect.center)
 
-        for bullet in pygame.sprite.groupcollide(self.aliensBullets, self.canons, 1, 0).keys():
+        # for bullet in pygame.sprite.groupcollide(self.aliensBullets, self.canons, 1, 0).keys():
+        for alien_bullet in pygame.sprite.spritecollide(self.canon, self.aliensBullets, 1):
             self.game_sounds[1].play()
+            self.game_sounds[4].play()
             self.canon.lifes -= 1
+            Fire(self.canon.rect.center)
 
-        for aliensBullets in pygame.sprite.groupcollide(self.aliensBullets, self.asteroiden, 1, 1).keys():
+        for aliensBullet in pygame.sprite.groupcollide(self.aliensBullets, self.asteroiden, 1, 1).keys():
             self.game_sounds[1].play()
+            Fire(aliensBullet.rect.center)
 
-        for bombs in pygame.sprite.groupcollide(self.bombs, self.blackHoles, 1, 0).keys():
+        for bomb in pygame.sprite.groupcollide(self.bombs, self.blackHoles, 1, 0).keys():
             self.game_sounds[1].play()
+            Fire(bomb.rect.center)
 
         for bullet in pygame.sprite.groupcollide(self.aliensBullets, self.blackHoles, 1, 0).keys():
             self.game_sounds[1].play()
+            Fire(bullet.rect.center)
 
-        # TODO jetzt bekommt der Spieler auch Punkte, wenn die Kanonen-Bullets und die kleinen Bullets zusammenstoßen
         for alien_bullet in pygame.sprite.groupcollide(self.aliensBullets, self.bullets, 1, 1).keys():
             self.game_sounds[1].play()
             self.points += alien_bullet.points
+            Fire(alien_bullet.rect.center)
 
         # /F30/ Wenn eine Reihe von Aliens einen unteren Bereich des Spielfeldes erreicht, verliert der Spieler eines seiner Leben.
-        for alien in pygame.sprite.groupcollide(self.aliens, self.canons, 1, 0).keys():
+        # for alien in pygame.sprite.groupcollide(self.aliens, self.canons, 1, 0).keys():
+        for alien in pygame.sprite.spritecollide(self.canon, self.aliens, 1):
             self.game_sounds[1].play()
+            self.game_sounds[4].play()
             self.canon.lifes -= 1
+            Fire(alien.rect.center)
+            Fire(self.canon.rect.center)
 
         for wall in pygame.sprite.groupcollide(self.walls, self.asteroiden, 1, 1).keys():
             self.game_sounds[1].play()
+            Fire(wall.rect.center)
 
         for wall in pygame.sprite.groupcollide(self.walls, self.bullets, 1, 1).keys():
             self.game_sounds[1].play()
+            Fire(wall.rect.center)
 
         for wall in pygame.sprite.groupcollide(self.walls, self.bombs, 1, 1).keys():
             self.game_sounds[1].play()
+            Fire(wall.rect.center)
 
         for wall in pygame.sprite.groupcollide(self.walls, self.aliensBullets, 1, 1).keys():
             self.game_sounds[1].play()
+            Fire(wall.rect.center)
 
         for wall in pygame.sprite.groupcollide(self.walls, self.blackHoles, 1, 0).keys():
             self.game_sounds[1].play()
+            Fire(wall.rect.center)
 
         for space_ship in pygame.sprite.groupcollide(self.space_ships, self.bullets, 1, 1).keys():
             self.game_sounds[1].play()
             self.points += space_ship.points
+            Fire(space_ship.rect.center)
 
         for space_ship in pygame.sprite.groupcollide(self.space_ships, self.bombs, 1, 1).keys():
             self.game_sounds[1].play()
             self.points += space_ship.points
+            Fire(space_ship.rect.center)
 
         for space_ship in pygame.sprite.groupcollide(self.space_ships, self.blackHoles, 1, 0).keys():
             self.game_sounds[1].play()
+            Fire(space_ship.rect.center)
 
-        for blackHoles in pygame.sprite.groupcollide(self.blackHoles, self.asteroiden, 0, 1).keys():
+        for asteroid in pygame.sprite.groupcollide(self.asteroiden, self.blackHoles, 1, 0).keys():
             self.game_sounds[1].play()
+            Fire(asteroid.rect.center)
 
         for space_ship in pygame.sprite.groupcollide(self.space_ships, self.decastlings, 1, 1).keys():
             self.game_sounds[1].play()
             self.points += space_ship.points
+            Fire(space_ship.rect.center)
 
         for decastlings in pygame.sprite.groupcollide(self.decastlings, self.asteroiden, 1, 1).keys():
             self.game_sounds[1].play()
+            Fire(decastlings.rect.center)
 
         for space_ship in pygame.sprite.groupcollide(self.space_ships, self.asteroiden, 1, 1).keys():
             self.game_sounds[1].play()
+            Fire(space_ship.rect.center)

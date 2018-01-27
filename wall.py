@@ -2,7 +2,7 @@
 #  -*- encodig: utf-8 -*-
 ___author___ = 'Nowodworski, Kossjak'
 
-import pygame, util
+import pygame
 
 
 class Wall(pygame.sprite.Sprite):

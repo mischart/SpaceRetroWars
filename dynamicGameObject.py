@@ -2,8 +2,8 @@ import gameObject
 
 
 class DynamicGameObject(gameObject.GameObject):
-    def __init__(self, speed, midbottom=None, topright=None):
-        gameObject.GameObject.__init__(self, midbottom, topright)
+    def __init__(self, speed, midbottom=None, topright=None, center=None):
+        gameObject.GameObject.__init__(self, midbottom, topright, center)
         self.speed = speed
 
     def update(self):

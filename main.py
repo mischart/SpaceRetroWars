@@ -14,6 +14,7 @@ from game import Game
 from start_menu import StartMenu
 from score_window import ScoreWindow
 from instruction_window import InstructionWindow
+from fire import Fire
 
 
 
@@ -149,12 +150,19 @@ def init_game():
     img = util.load_image('Railgun.png', (10, 50))
     Decastling.image = img
 
+    img = util.load_image('fire.png', (50, 50))
+    Fire.images = [img, pygame.transform.flip(img, 1, 1)]
+    Fire.image = Fire.images[0]
+
     # sounds
     game_sounds = []
     game_sounds.append(util.load_sound('bullet.wav'))
     game_sounds.append(util.load_sound('destruction.wav'))
     game_sounds.append(util.load_sound('Railgun.wav'))
     game_sounds.append(util.load_sound('blackHole.wav'))
+    game_sounds.append(util.load_sound('alarm.wav'))
+    game_sounds.append(util.load_sound('asteroid.wav'))
+
 
     # Action -> Alter
     # Assign Variables
