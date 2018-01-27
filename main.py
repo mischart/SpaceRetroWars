@@ -110,19 +110,20 @@ def init_game():
     game_images.append(util.load_image("EndScreen.jpeg", screen_size))  # Hintergrund
     game_images.append(util.load_image('YouWon.png', (75, 100)))
     game_images.append(util.load_image('GameScreen_2.jpg', screen_size))
+    game_images.append(util.load_image('bullet.png', (10, 10)))
+    game_images.append(util.load_image('button_back.png', (60, 20)))
+    game_images.append(util.load_image('button_back.png', (90, 30)))
 
     score_window_images = []
     score_window_images.append(game_images[3])
-    score_window_images.append(util.load_image('button_back.png', (60, 20)))
-    score_window_images.append(util.load_image('button_back.png', (90, 30)))
+    score_window_images.append(game_images[5])
+    score_window_images.append(game_images[6])
 
     instruction_window_images = score_window_images
 
     Canon.image = util.load_image('player.png', (50, 50))
 
-    img = util.load_image('bullet.png', (10, 10))
-    Bullet.image = img
-    game_images.append(img)
+    Bullet.image = game_images[4]
 
     img = util.load_image('Asteroid.png', (25, 25))
     Asteroid.image = img

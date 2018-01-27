@@ -13,7 +13,7 @@ from wall import Wall
 from spaceShip import SpaceShip
 from time import strftime
 from state import State
-
+from button import Button
 
 class Game(State):
     def __init__(self, game_images, game_sounds, game_fonts):
@@ -24,9 +24,16 @@ class Game(State):
         self.game_fonts = game_fonts
         self.create_sprite_groups()
         self.assign_sprite_groups()
+        self.buttons = pygame.sprite.Group()
+        self.game_over_text = self.game_fonts[0].render('Game Over', True, Color('White'))
+        self.you_won_text = self.game_fonts[0].render('You Won', True, Color('White'))
+        Button.groups = self.buttons
+        screen_size = pygame.display.get_surface().get_size()
+        self.back_button = Button((game_images[5], game_images[6]),
+                                  (screen_size[0] - 140, screen_size[1] - self.y_for_bottom_buttons))
+
 
     def cleanup(self):
-        print('cleaning up Game state stuff')
         pygame.mixer.music.stop()
         self.canons.empty()
         self.aliens.empty()
@@ -39,6 +46,7 @@ class Game(State):
         self.walls.empty()
         self.space_ships.empty()
         self.blackHoles.empty()
+        self.set_buttons_to_unfocused(self.buttons)
 
     def startup(self):
         print('starting Game state stuff')
@@ -56,7 +64,7 @@ class Game(State):
 
         self.canon = Canon(util.get_screen_rect().midbottom)
         self.points = 0
-        self.game_over_setted = False
+        self.game_over = False
         self.create_alien_matrix(State.settings_dict['degree_of_difficulty'])
         self.create_wall()
         self.number_of_asteroids_to_do = 0
@@ -103,94 +111,89 @@ class Game(State):
             if event.key == K_RIGHT:
                 if not pressedKeys[K_LEFT]:
                     self.canon.stop()
-        # TODO: Wieso??
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if not self.aliens.sprites() or self.canon.lifes <= 0:
-                self.done = True
+        elif self.game_over:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.back_button.rect.collidepoint(pygame.mouse.get_pos()):
+                    self.done = True
+            elif event.type == pygame.MOUSEMOTION:
+                self.set_buttons_to_unfocused(self.buttons)
+                self.set_buttons_to_focused(self.buttons)
 
     def update(self, screen):
-
-        # AlienBullets generieren
-        self.generate_alien_bullet()
-
-        self.generate_space_ship()
-
-        self.update_asteroid_rain()
-
-        # Collisions
-        self.check_collisions()
-
-        # /F80/ Während des Spiels muss die Anzahl der Leben des Spielers sowie die Anzahl der erreichten Punkte dargestellt werden.
-        punkteText = self.game_fonts[1].render('Punkte: ' + str(self.points), True, Color('White'))
-        lebenText = self.game_fonts[1].render('Leben: ' + str(self.canon.lifes), True, Color('White'))
-        # Redisplay
-        # bgBlue.blit(charImage, charRect)  # This just makes it in the same location
-        # and prints it the same size as the image
         screen.blit(self.background, (0, 0))
-        screen.blit(punkteText, [screen.get_width() - 300, screen.get_height() - 50])
-        screen.blit(lebenText, [50, screen.get_height() - 50])
-        if self.canon.lifes <= 0:
-            self.background = self.game_images[1]
-            self.done = True
-            game_over_text = self.game_fonts[0].render('Game Over', True, Color('White'))
-            screen.blit(game_over_text, [screen.get_width() / 5, 10])
-            # TODO Loop Spiel wieder neu starten
-        if not self.aliens.sprites():
-            if not self.game_over_setted:
+        if not self.game_over:
+            # AlienBullets generieren
+            self.generate_alien_bullet()
+
+            self.generate_space_ship()
+
+            self.update_asteroid_rain()
+
+            # Collisions
+            self.check_collisions()
+
+            # /F80/ Während des Spiels muss die Anzahl der Leben des Spielers sowie die Anzahl der erreichten Punkte dargestellt werden.
+            punkteText = self.game_fonts[1].render('Punkte: ' + str(self.points), True, Color('White'))
+            lebenText = self.game_fonts[1].render('Leben: ' + str(self.canon.lifes), True, Color('White'))
+            # Redisplay
+            screen.blit(punkteText, [screen.get_width() - 300, screen.get_height() - 50])
+            screen.blit(lebenText, [50, screen.get_height() - 50])
+            if self.canon.lifes <= 0:
+                self.background = self.game_images[1]
+                self.game_over = True
+            if not self.aliens.sprites():
                 self.background = self.game_images[1]
                 Bullet.image = self.game_images[2]
-                db = sqlite3.connect('Highscore.db')
-                cursor = db.cursor()
-                # Highscore Eintrag
                 # Punkte mit Leben multiplizieren
-                cursor.execute("INSERT INTO sw VALUES(?,?,?)",
-                               (str(self.points * self.canon.lifes), strftime("%d.%m.%Y"),
-                                State.settings_dict['player_name']))
-                db.commit()
-                db.close()
-                self.game_over_setted = True
-            # TODO wieso? Bullet.image = you_won_image
-            # Antwort von Oleg: Sei kreativ, sei abstrakt - nur so schafft man neue Gimmicks die auch etwas besonderes bieten und nicht die ewige 0815 Nummer! ;)
-            you_won_text = self.game_fonts[0].render('You Won', True, Color('White'))
-            screen.blit(you_won_text, [screen.get_width() / 4, screen.get_height() / 3])
-
-        self.allSprites.update()
-
-        # Bewegung der Alienschiffe
-        if Alien.goDown:
-            self.aliens.update(True)
-            # TODO wieso wird BlackHole mit der Position eines zufälligen, äußeren Alien verbunden?
-            shooting_alien = self.get_random_outer_aliens()
-            if self.aliens.sprites():
-                shooting_alien_position = shooting_alien.getPosition()
-                # print(screen.get_height() / 1.6, screen.get_height() / 1.4, shooting_alien_position[1])
-                if screen.get_height() / 1.6 < shooting_alien_position[1] and screen.get_height() / 1.4 > \
-                        shooting_alien_position[1]:
-                    # BlackHole(startPosition)
-                    self.game_sounds[3].play()
-                    x = random.randint(0, screen.get_width() - BlackHole.image.get_rect().width)
-                    BlackHole((x, 0))
-        Alien.goDown = False
-        # Beim erreichen der Aliens des unteren screen Randes
-        if Alien.capture:
-            # keepGoing = False
-            self.canon.lifes -= 1
-            Alien.capture = False
-        # allSprites.remove(aliens.sprites())
-        # aliens.empty()
-        # Alien.capture = False
+                result = str(self.points * self.canon.lifes)
+                # Ergebnis, Datum und Spielername in der DB speichern
+                util.save_score_result(result, strftime("%d.%m.%Y"), State.settings_dict['player_name'])
+                self.game_over = True
+            self.allSprites.update()
+            # Bewegung der Alienschiffe
+            if Alien.goDown:
+                self.aliens.update(True)
+                # TODO wieso wird BlackHole mit der Position eines zufälligen, äußeren Alien verbunden?
+                shooting_alien = self.get_random_outer_aliens()
+                if self.aliens.sprites():
+                    shooting_alien_position = shooting_alien.getPosition()
+                    # print(screen.get_height() / 1.6, screen.get_height() / 1.4, shooting_alien_position[1])
+                    if screen.get_height() / 1.6 < shooting_alien_position[1] and screen.get_height() / 1.4 > \
+                            shooting_alien_position[1]:
+                        # BlackHole(startPosition)
+                        self.game_sounds[3].play()
+                        x = random.randint(0, screen.get_width() - BlackHole.image.get_rect().width)
+                        BlackHole((x, 0))
+            Alien.goDown = False
+            # Beim erreichen der Aliens des unteren screen Randes
+            if Alien.capture:
+                self.canon.lifes -= 1
+                Alien.capture = False
+                # allSprites.remove(aliens.sprites())
+                # aliens.empty()
+                # Alien.capture = False
+        # falls das Spiel zu Ende ist
+        else:
+            # falls der Spieler verloren hat
+            if self.canon.lifes < 1:
+                screen.blit(self.game_over_text, [screen.get_width() / 5, 10])
+                self.done = True
+            # falls der Spieler gewonnen hat
+            else:
+                screen.blit(self.you_won_text, [screen.get_width() / 4, screen.get_height() / 3])
+                pygame.draw.rect(screen, pygame.Color('Black'), self.bottom_menu_box)
+                self.buttons.update()
+                self.buttons.draw(screen)
+            self.allSprites.update()
         self.allSprites.draw(screen)
         pygame.display.flip()
 
         # Um den Game Over Bildschirm einige Zeit aufrecht zu erhalten
-        if self.done and self.canon.lifes <= 0:
-            x = 0
-            while x < 1:
-                x += 1
-                pygame.time.delay(1000)
+        if self.done and self.canon.lifes < 1:
+            pygame.time.delay(1000)
 
-    def draw(self, screen):
-        screen.fill((0, 0, 255))
+    # def draw(self, screen):
+    #     screen.fill((0, 0, 255))
 
     def create_sprite_groups(self):
         self.canons = pygame.sprite.Group()

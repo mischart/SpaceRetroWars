@@ -1,6 +1,7 @@
 import os, pygame, sqlite3
 from pygame.compat import geterror
 
+db_file_name = 'Highscore.db'
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 data_dir = os.path.join(main_dir, 'data')
 
@@ -35,18 +36,23 @@ def get_screen_rect():
     return screen.get_rect()
 
 # /F90/ Es muss möglich sein, die Liste der besten Spielergebnisse aufzurufen (lokal).
+# lesender Zugriff auf die DB
 def get_highscore_results():
-    # Ich habe DB Tabelle mit Hilfe des Terminals erstellt, wie im Video 1-34: Tools -> Python Console
-    # import sqlite3
-    # con = sqlite3.connect('Highscore.db')
-    # cursor = con.cursor()
-    # cursor.execute("Create table sw (punkte varchar(32), datum varchar(32))")
-    # con.commit()
-
     # Verbindung zu der Datenbank Highscore2, Tabelle sw
-    db = sqlite3.connect('Highscore.db')
+    db = sqlite3.connect(db_file_name)
     cursor = db.cursor()
     cursor.execute("SELECT * FROM sw  ORDER BY -punkte")
     result = cursor.fetchall()
     db.close()
     return result
+
+
+# schreibender Zugriff auf die DB zum Speichern der Spielerergebnisse
+def save_score_result(result, date, name):
+    db = sqlite3.connect(db_file_name)
+    cursor = db.cursor()
+    # Highscore Eintrag
+    cursor.execute("INSERT INTO sw VALUES(?,?,?)",
+                   (result, date, name))
+    db.commit()
+    db.close()
