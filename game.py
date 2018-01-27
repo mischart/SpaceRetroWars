@@ -153,21 +153,15 @@ class Game(State):
                 self.your_result_text = self.game_fonts[1].render(text, True, Color('White'))
                 self.game_over = True
             self.allSprites.update()
-            # Bewegung der Alienschiffe
+
+            # Nach dem Erreichen eines Bereichs des linken bzw. des rechten Spielfeldrandes
+            # werden die Reihen von Aliens um denselben Bereich nach unten verschoben
+            # und die Bewegungsrichtung wird geändert.
             if Alien.goDown:
                 self.aliens.update(True)
-                # TODO wieso wird BlackHole mit der Position eines zufälligen, äußeren Alien verbunden?
-                shooting_alien = self.get_random_outer_aliens()
-                if self.aliens.sprites():
-                    shooting_alien_position = shooting_alien.getPosition()
-                    # print(screen.get_height() / 1.6, screen.get_height() / 1.4, shooting_alien_position[1])
-                    if screen.get_height() / 1.6 < shooting_alien_position[1] and screen.get_height() / 1.4 > \
-                            shooting_alien_position[1]:
-                        # BlackHole(startPosition)
-                        self.game_sounds[3].play()
-                        x = random.randint(0, screen.get_width() - BlackHole.image.get_rect().width)
-                        BlackHole((x, 0))
+                self.generate_black_hole(screen)
             Alien.goDown = False
+
             # Beim erreichen der Aliens des unteren screen Randes
             if Alien.capture:
                 self.canon.lifes -= 1
@@ -273,6 +267,18 @@ class Game(State):
             if self.counter_for_space_ships == 0:
                 self.counter_for_space_ships = random.randint(200, 400)
                 SpaceShip(util.get_screen_rect().topright)
+
+    def generate_black_hole(self, screen):
+        if self.aliens.sprites():
+            shooting_alien = self.get_random_outer_aliens()
+            shooting_alien_position = shooting_alien.getPosition()
+            # print(screen.get_height() / 1.6, screen.get_height() / 1.4, shooting_alien_position[1])
+            if screen.get_height() / 1.6 < shooting_alien_position[1] and screen.get_height() / 1.4 > \
+                    shooting_alien_position[1]:
+                # BlackHole(startPosition)
+                self.game_sounds[3].play()
+                x = random.randint(0 + BlackHole.image.get_rect().width, screen.get_width())
+                BlackHole((x, 0))
 
     def get_random_outer_aliens(self):
         last_index = len(Alien.alienMatrix) - 1
