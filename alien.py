@@ -4,16 +4,13 @@ ___author___ = 'Nowodworski, Kossjak'
 
 import pygame, dynamicGameObject
 
-SPEED = 5
-
-
 class Alien(dynamicGameObject.DynamicGameObject):
     goDown = False
     capture = False
     alienMatrix = None
 
-    def __init__(self, position=None):
-        dynamicGameObject.DynamicGameObject.__init__(self, SPEED, midbottom=position)
+    def __init__(self, speed, position=None):
+        dynamicGameObject.DynamicGameObject.__init__(self, speed, midbottom=position)
         self.points = 1
 
     def update(self, lower=False):

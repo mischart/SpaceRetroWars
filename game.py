@@ -16,13 +16,16 @@ from state import State
 from button import Button
 from fire import Fire
 
+LEVEL_COUNTER = 30
+
 class Game(State):
-    def __init__(self, game_images, game_sounds, game_fonts):
+    def __init__(self, game_images, game_sounds, game_fonts, spoken_words):
         State.__init__(self)
         self.next = 'start_menu'
         self.game_images = game_images
         self.game_sounds = game_sounds
         self.game_fonts = game_fonts
+        self.spoken_words = spoken_words
         self.create_sprite_groups()
         self.assign_sprite_groups()
         self.buttons = pygame.sprite.Group()
@@ -34,44 +37,72 @@ class Game(State):
         self.back_button = Button((game_images[5], game_images[6]),
                                   (screen_size[0] - 140, screen_size[1] - self.y_for_bottom_buttons))
 
+        self.level_settings = {
+            "current_level": 1,
+            "new_level": True,
+            1: {"alien_speed": 5, "bullet_counter": 60},
+            2: {"alien_speed": 6, "bullet_counter": 50},
+            3: {"alien_speed": 7, "bullet_counter": 40},
+            "next_level_counter": LEVEL_COUNTER
+        }
+
 
     def cleanup(self):
         pygame.mixer.music.stop()
-        # self.canons.empty()
-        self.aliens.empty()
-        self.bullets.empty()
-        self.asteroiden.empty()
-        self.decastlings.empty()
-        self.bombs.empty()
-        self.aliensBullets.empty()
-        self.allSprites.empty()
-        self.walls.empty()
-        self.space_ships.empty()
-        self.blackHoles.empty()
+        self.empty_sprite_groups()
         self.fires.empty()
+        self.walls.empty()
+        self.allSprites.empty()
         self.set_buttons_to_unfocused(self.buttons)
 
     def startup(self):
-        print('starting Game state stuff')
         # TODO checken, ob man die mp3-Datei schon früher (zusammen mit den anderen Sounds) laden kann
         pygame.mixer.music.load('data/game.mp3')
         pygame.mixer.music.play(-1)
         Bullet.image = self.game_images[4]
-        if State.settings_dict['game_background'] == 1:
+        if State.game_settings['game_background'] == 1:
             self.background = self.game_images[0]
         else:
             self.background = self.game_images[3]
 
-        self.counter_for_alien_bullets = 60
-        self.counter_for_space_ships = random.randint(200, 400)
-
         self.canon = Canon(util.get_screen_rect().midbottom)
         self.points = 0
         self.game_over = False
-        self.create_alien_matrix(State.settings_dict['degree_of_difficulty'])
+        self.level_settings["current_level"] = 1
+        self.level_settings["next_level_counter"] = LEVEL_COUNTER
+        self.initialize_level()
+
+    def initialize_level(self):
+        # self.counter_for_alien_bullets = 60
+        self.level_settings["new_level"] = True
+        level = self.level_settings["current_level"]
+        bullet_counter = self.level_settings[level]["bullet_counter"]
+        self.counter_for_alien_bullets = bullet_counter
+        self.counter_for_space_ships = random.randint(200, 400)
+        alien_speed = self.level_settings[level]["alien_speed"]
+        self.create_alien_matrix(State.game_settings['degree_of_difficulty'], alien_speed)
         self.create_wall()
         self.number_of_asteroids_to_do = 0
         self.counter_for_asteroids = 0
+        self.spoken_words[level].play()
+
+    def empty_sprite_groups(self):
+        self.allSprites.remove(self.aliens)
+        self.aliens.empty()
+        self.allSprites.remove(self.bullets)
+        self.bullets.empty()
+        self.allSprites.remove(self.asteroiden)
+        self.asteroiden.empty()
+        self.allSprites.remove(self.decastlings)
+        self.decastlings.empty()
+        self.allSprites.remove(self.bombs)
+        self.bombs.empty()
+        self.allSprites.remove(self.aliensBullets)
+        self.aliensBullets.empty()
+        self.allSprites.remove(self.space_ships)
+        self.space_ships.empty()
+        self.allSprites.remove(self.blackHoles)
+        self.blackHoles.empty()
 
     def get_event(self, event):
         if event.type == QUIT:
@@ -145,15 +176,28 @@ class Game(State):
                 self.background = self.game_images[1]
                 self.game_over = True
             if not self.aliens.sprites():
-                self.background = self.game_images[1]
-                Bullet.image = self.game_images[2]
-                # Punkte mit Leben multiplizieren
-                result = str(self.points * self.canon.lifes)
-                # Ergebnis, Datum und Spielername in der DB speichern
-                util.save_score_result(result, strftime("%d.%m.%Y"), State.settings_dict['player_name'])
-                text = '{} Leben x {} Punkte = {}'.format(self.canon.lifes, self.points, result)
-                self.your_result_text = self.game_fonts[1].render(text, True, Color('White'))
-                self.game_over = True
+                if self.level_settings["current_level"] < 3:
+                    if self.level_settings["next_level_counter"] == LEVEL_COUNTER:
+                        self.spoken_words["mission_completed"].play()
+                        self.empty_sprite_groups()
+                    self.level_settings["next_level_counter"] -= 1
+                    if self.level_settings["next_level_counter"] < 1:
+                        self.level_settings["next_level_counter"] = LEVEL_COUNTER
+                        self.level_settings["current_level"] += 1
+                        self.empty_sprite_groups()
+                        self.initialize_level()
+                else:
+                    self.spoken_words["winner"].play()
+                    self.background = self.game_images[1]
+                    Bullet.image = self.game_images[2]
+                    self.empty_sprite_groups()
+                    # Punkte mit Leben multiplizieren
+                    result = str(self.points * self.canon.lifes)
+                    # Ergebnis, Datum und Spielername in der DB speichern
+                    util.save_score_result(result, strftime("%d.%m.%Y"), State.game_settings['player_name'])
+                    text = '{} Leben x {} Punkte = {}'.format(self.canon.lifes, self.points, result)
+                    self.your_result_text = self.game_fonts[1].render(text, True, Color('White'))
+                    self.game_over = True
             self.allSprites.update()
 
             # Nach dem Erreichen eines Bereichs des linken bzw. des rechten Spielfeldrandes
@@ -190,6 +234,10 @@ class Game(State):
 
         # Um den Game Over Bildschirm einige Zeit aufrecht zu erhalten
         if self.done and self.canon.lifes < 1:
+            self.spoken_words["game_over"].play()
+            pygame.time.delay(2000)
+        if self.level_settings["new_level"]:
+            self.level_settings["new_level"] = False
             pygame.time.delay(1000)
 
     # def draw(self, screen):
@@ -222,12 +270,12 @@ class Game(State):
         SpaceShip.groups = self.allSprites, self.space_ships
         Fire.groups = self.fires, self.allSprites
 
-    def create_alien_matrix(self, degree_of_difficulty):
+    def create_alien_matrix(self, degree_of_difficulty, alien_speed):
         # anzahlAliensInReihe = schwierigkeitsgrad
         # reihenAliens = schwierigkeitsgrad
 
         # Erste For Schleife definiert Anzahl der Aliens Reihen und zweite for Schleife die Anzhal der Alienschiffe in der Reihe
-        alienMatrix = [[Alien() for x in range(degree_of_difficulty)] for y in range(degree_of_difficulty)]
+        alienMatrix = [[Alien(alien_speed) for x in range(degree_of_difficulty)] for y in range(degree_of_difficulty)]
         for i in range(degree_of_difficulty):
             for j in range(degree_of_difficulty):
                 # x Koordinaten
@@ -258,8 +306,8 @@ class Game(State):
         # AlienBullets generieren
         self.counter_for_alien_bullets -= 1
         if self.counter_for_alien_bullets == 0:
-            # TODO COUNTER_FOR_ALIEN_BULLETS im laufe der Zeit verringern
-            self.counter_for_alien_bullets = 60
+            level = self.level_settings["current_level"]
+            self.counter_for_alien_bullets = self.level_settings[level]["bullet_counter"]
             shooting_alien = self.get_random_outer_aliens()
             if shooting_alien:
                 AlienBullet(shooting_alien.getPosition())

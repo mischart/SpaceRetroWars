@@ -54,16 +54,16 @@ class StartMenu(State):
         # player_name = State.settings_dict['player_name']
         player_name = self.text_input.get_text()
         if not player_name or player_name == "":
-            State.settings_dict['player_name'] = "anonymous"
+            State.game_settings['player_name'] = "anonymous"
         else:
-            State.settings_dict['player_name'] = player_name
+            State.game_settings['player_name'] = player_name
         self.text_input.clean_up()
 
         if self.screen_button_1.clicked:
             #print("screen_button_1.clicked")
-            State.settings_dict['game_background'] = 1
+            State.game_settings['game_background'] = 1
         else:
-            State.settings_dict['game_background'] = 2
+            State.game_settings['game_background'] = 2
         self.set_buttons_to_unfocused(self.buttons)
         self.screen_button_1.set_clicked(True)
         self.screen_button_2.set_clicked(False)
@@ -98,15 +98,15 @@ class StartMenu(State):
                 #self.done = True
             if self.difficulty_5x5_button.rect.collidepoint(pygame.mouse.get_pos()):
                 print("start_menu.py difficulty_5x5_button clicked")
-                State.settings_dict['degree_of_difficulty'] = 5
+                State.game_settings['degree_of_difficulty'] = 5
                 self.done = True
             if self.difficulty_6x6_button.rect.collidepoint(pygame.mouse.get_pos()):
                 print("start_menu.py difficulty_6x6_button clicked")
-                State.settings_dict['degree_of_difficulty'] = 6
+                State.game_settings['degree_of_difficulty'] = 6
                 self.done = True
             if self.difficulty_7x7_button.rect.collidepoint(pygame.mouse.get_pos()):
                 print("start_menu.py difficulty_7x7_button clicked")
-                State.settings_dict['degree_of_difficulty'] = 7
+                State.game_settings['degree_of_difficulty'] = 7
                 self.done = True
 
             if self.quit_button.rect.collidepoint(pygame.mouse.get_pos()):

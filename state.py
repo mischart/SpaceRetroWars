@@ -2,7 +2,7 @@
 import pygame
 
 class State(object):
-    settings_dict = {
+    game_settings = {
         'player_name': None,
         'game_background': None,
         'degree_of_difficulty': None

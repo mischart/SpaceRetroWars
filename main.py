@@ -163,6 +163,14 @@ def init_game():
     game_sounds.append(util.load_sound('alarm.wav'))
     game_sounds.append(util.load_sound('asteroid.wav'))
 
+    spoken_words = {
+        1: util.load_sound('round_1.wav'),
+        2: util.load_sound('round_2.wav'),
+        3: util.load_sound('round_3.wav'),
+        "mission_completed": util.load_sound('mission_completed.wav'),
+        "winner": util.load_sound('winner.wav'),
+        "game_over": util.load_sound('game_over.wav'),
+    }
 
     # Action -> Alter
     # Assign Variables
@@ -172,7 +180,7 @@ def init_game():
     app = Control(screen_size)
     state_dict = {
         'start_menu': StartMenu(start_menu_images, start_menu_fonts),
-        'game': Game(game_images, game_sounds, game_fonts),
+        'game': Game(game_images, game_sounds, game_fonts, spoken_words),
         'score_window': ScoreWindow(score_window_images, score_window_fonts),
         'instruction_window': InstructionWindow(instruction_window_images, instruction_window_fonts)
     }
@@ -180,7 +188,6 @@ def init_game():
     app.setup_states(state_dict, 'start_menu')
     app.main_game_loop()
     pygame.quit()
-
 
 if __name__ == '__main__':
     init_game()
