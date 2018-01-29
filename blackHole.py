@@ -6,6 +6,7 @@ import dynamicGameObject
 SPEED = 9
 
 
+# Klasse zum Repraesentieren der schwarzen Loecher
 class BlackHole(dynamicGameObject.DynamicGameObject):
     def __init__(self, position):
         dynamicGameObject.DynamicGameObject.__init__(self, SPEED, topright=position)

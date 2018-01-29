@@ -3,6 +3,8 @@ import dynamicGameObject
 
 SPEED = -6
 
+
+# Klasse zum Repraesentieren von SpaceShips
 class SpaceShip(dynamicGameObject.DynamicGameObject):
     def __init__(self, topright):
         dynamicGameObject.DynamicGameObject.__init__(self, SPEED, topright=topright)

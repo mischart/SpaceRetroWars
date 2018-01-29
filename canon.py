@@ -1,9 +1,12 @@
-# /F20/ Das Spiel muss dem Spieler ermöglichen, am unteren Rand des Spielfeldes eine Kanone horizontal nach rechts und nach links zu steuern.
+# /F20/ Das Spiel muss dem Spieler ermöglichen, am unteren Rand
+# des Spielfeldes eine Kanone horizontal nach rechts und nach links zu steuern.
 import dynamicGameObject
 
 SPEED = 10
 
 
+# Klasse zum Repraesentieren der Kanone,
+# die von dem Spieler gesteuert wird
 class Canon(dynamicGameObject.DynamicGameObject):
     def __init__(self, position):
         dynamicGameObject.DynamicGameObject.__init__(self, SPEED, midbottom=position)

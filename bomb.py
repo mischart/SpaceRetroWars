@@ -3,6 +3,7 @@ import dynamicGameObject
 SPEED = -1
 
 
+# Klasse zum Repraesentieren der Bomben des Spielers
 class Bomb(dynamicGameObject.DynamicGameObject):
     price = 2
 

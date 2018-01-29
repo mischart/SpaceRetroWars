@@ -4,10 +4,12 @@ ___author___ = 'Nowodworski, Kossjak'
 
 import pygame, dynamicGameObject
 
+
+# Klasse zum Repraesentieren von Aliens
 class Alien(dynamicGameObject.DynamicGameObject):
     goDown = False
     capture = False
-    alienMatrix = None
+    alienMatrix = None  # Matrix mit Aliens
 
     def __init__(self, speed, position=None):
         dynamicGameObject.DynamicGameObject.__init__(self, speed, midbottom=position)
@@ -20,7 +22,7 @@ class Alien(dynamicGameObject.DynamicGameObject):
                             self.rect.right > self.screenRect.right:
                 Alien.goDown = True
         else:
-            self.speed = -self.speed
+            self.speed = -self.speed  # Aenderung der Bewegungsrichtung
             self.rect.move_ip(self.speed, 30)
 
         if self.rect.bottom >= self.screenRect.bottom:
@@ -34,10 +36,12 @@ class Alien(dynamicGameObject.DynamicGameObject):
         for i in range(len(Alien.alienMatrix)):
             for j in range(len(Alien.alienMatrix[i])):
                 if self is Alien.alienMatrix[i][j]:
+                    # Matrix-Elemente, die eliminierte Aliens darstellen verschieben
                     Alien.move_matrixitem_to_initial_row(i, j)
                     break
         pygame.sprite.Sprite.kill(self)
 
+    # Methode zum Verschieben von Matrix-Elementen
     @classmethod
     def move_matrixitem_to_initial_row(cls, item_row, item_column):
         if item_row > 0:

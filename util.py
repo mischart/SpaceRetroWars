@@ -1,3 +1,5 @@
+# diverse Hilfsfunktionen
+
 import os, pygame, sqlite3
 from pygame.compat import geterror
 
@@ -21,6 +23,7 @@ def load_image(fileName, size=None):
 class dummysound:
     def play(self): pass
 
+
 def load_sound(fileName):
     if not pygame.mixer: return dummysound()
     fullname = os.path.join(data_dir, fileName)
@@ -31,9 +34,11 @@ def load_sound(fileName):
         print('Warning, unable to load, %s' % fullname)
     return dummysound()
 
+
 def get_screen_rect():
     screen = pygame.display.get_surface()
     return screen.get_rect()
+
 
 # /F90/ Es muss möglich sein, die Liste der besten Spielergebnisse aufzurufen (lokal).
 # lesender Zugriff auf die DB

@@ -6,6 +6,7 @@ import dynamicGameObject
 SPEED = 8
 
 
+# Klasse zum Repraesentieren der Asteroiden
 class Asteroid(dynamicGameObject.DynamicGameObject):
     price = 4
 

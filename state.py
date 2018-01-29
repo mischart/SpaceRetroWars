@@ -1,6 +1,8 @@
-# /F10/ Vor dem Spielbeginn muss dem Spieler gewährleistet werden, eine von mindestens zwei Spielumgebungen auszuwählen.
 import pygame
 
+
+# Klasse State zur Implementierung eines Zustandsautomaten (State Pattern)
+# Auf der Basis der Quelle: http://python-gaming.com/pygame/docs/tuts/state_machine.html
 class State(object):
     game_settings = {
         'player_name': None,

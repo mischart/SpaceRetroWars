@@ -1,10 +1,11 @@
-# /F60/ Über der Kanone müssen sich Blöcke befinden, hinter denen sich die Kanone verstecken kann. Die Blöcke können durch ein Geschoss sowohl von den Aliens als auch von der Kanone getroffen werden, sodass sie letztendlich zerstört werden.
+# /F60/ Über der Kanone müssen sich Blöcke befinden, hinter denen sich die Kanone verstecken kann.
 #  -*- encodig: utf-8 -*-
 ___author___ = 'Nowodworski, Kossjak'
 
 import pygame
 
 
+# Klasse zum Repraesentieren der Bloecke
 class Wall(pygame.sprite.Sprite):
     image = None
 

@@ -4,6 +4,7 @@ from button import Button
 from state import State
 
 
+# Klasse zur Darstellung der besten Ergebnisse
 class ScoreWindow(State):
     def __init__(self, images, fonts):
         State.__init__(self)
@@ -59,16 +60,16 @@ class ScoreWindow(State):
         start_y = 100
         screen = pygame.display.get_surface()
 
-        # erste Spalte
+        # erste Spalte der Anzeige
         x_y_of_points_row = (start_x, start_y)
         screen.blit(point_title, x_y_of_points_row)
 
-        # zweite Spalte
+        # zweite Spalte der Anzeige
         x = start_x + width_of_point_title + distance_between_columns
         x_y_of_date_row = (x, start_y)
         screen.blit(date_title, x_y_of_date_row)
 
-        # dritte Spalte
+        # dritte Spalte der Anzeige
         x += distance_between_columns + width_of_date_title
         x_y_of_name_row = (x, start_y)
         screen.blit(name_title, x_y_of_name_row)

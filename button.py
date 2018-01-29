@@ -1,8 +1,7 @@
-# /F10/ Vor dem Spielbeginn muss dem Spieler gewährleistet werden, eine von mindestens zwei Spielumgebungen auszuwählen.
-
 import pygame
 
 
+# Klasse zum Repraesentieren der Buttons
 class Button(pygame.sprite.Sprite):
     def __init__(self, images, topleft):
         pygame.sprite.Sprite.__init__(self, self.groups)

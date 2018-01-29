@@ -1,5 +1,3 @@
-import pygame
-
 """
 Copyright 2017, Silas Gyger, silasgyger@gmail.com, All rights reserved.
 """
@@ -24,7 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-"""Source : 
+"""
+Klasse zur Texteingabe
+Quelle: 
 http://www.pygame.org/project-Pygame+Text+Input-3013-5031.html
 https://github.com/Nearoo/pygame-text-input
 """

@@ -3,6 +3,7 @@ import gameObject
 START_LIFES = 12
 
 
+# Klasse zum Repraesentieren des Feuers nach der Explosion
 class Fire(gameObject.GameObject):
     images = None
     animation_cycle = 3

@@ -7,8 +7,8 @@ import dynamicGameObject
 SPEED = 8
 
 
+# Klasse zum Repraesentieren der Geschosse der Aliens
 class AlienBullet(dynamicGameObject.DynamicGameObject):
-
     points = 2
 
     def __init__(self, position):

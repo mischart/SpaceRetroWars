@@ -3,6 +3,7 @@ import dynamicGameObject
 SPEED = -50
 
 
+# Klasse zum Repraesentieren von Decastling
 class Decastling(dynamicGameObject.DynamicGameObject):
     price = 3
 

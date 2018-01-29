@@ -1,5 +1,4 @@
-# Import and Initialization
-import pygame, util, random, sqlite3
+import pygame, util, random
 from pygame.locals import *
 from alien import Alien
 from AlienBullet import AlienBullet
@@ -18,6 +17,8 @@ from fire import Fire
 
 LEVEL_COUNTER = 30
 
+
+# Klasse mit der Spiellogik
 class Game(State):
     def __init__(self, game_images, game_sounds, game_fonts, spoken_words):
         State.__init__(self)
@@ -46,7 +47,6 @@ class Game(State):
             "next_level_counter": LEVEL_COUNTER
         }
 
-
     def cleanup(self):
         pygame.mixer.music.stop()
         self.empty_sprite_groups()
@@ -72,8 +72,8 @@ class Game(State):
         self.level_settings["next_level_counter"] = LEVEL_COUNTER
         self.initialize_level()
 
+    # Level initialisieren
     def initialize_level(self):
-        # self.counter_for_alien_bullets = 60
         self.level_settings["new_level"] = True
         level = self.level_settings["current_level"]
         bullet_counter = self.level_settings[level]["bullet_counter"]
@@ -112,14 +112,15 @@ class Game(State):
                 self.canon.moveRight()
             elif event.key == K_LEFT:
                 self.canon.moveLeft()
-            # /F40/ Das Spiel muss dem Spieler ermöglichen, mit der Kanone auf die Aliens zu schießen, um sie zu eliminieren. Wird ein Alien getroffen, bekommt der Spieler eine bestimmte Anzahl von Punkten.
+            # /F40/ Das Spiel muss dem Spieler ermöglichen, mit der Kanone auf die Aliens zu schießen, um sie zu eliminieren.
+            # Wird ein Alien getroffen, bekommt der Spieler eine bestimmte Anzahl von Punkten.
             elif event.key == K_UP:
                 if not self.bullets.sprites():
                     # beim Drücken der Keyup Taste erscheint das Geschoss
                     Bullet(self.canon.getPosition())
                     self.game_sounds[0].play()
             elif event.key == K_d:
-                # beim Drücken der KeyDown Taste wird Decastling durchgeführt wenn aliens da sind und Punkte mehr als 3 vorhanden sind
+                # beim Drücken der KeyDown Taste wird Decastling durchgeführt wenn aliens da sind und Punkte vorhanden sind
                 if self.aliens.sprites() and self.points >= Decastling.price:
                     self.game_sounds[2].play()
                     Decastling(self.canon.getPosition())
@@ -132,12 +133,10 @@ class Game(State):
                         Bomb(self.canon.getPosition())
                         self.points = self.points - Bomb.price
             elif event.key == K_a:
-                # screen_width = 1 * randomPosition
                 if self.aliens.sprites() and self.points >= Asteroid.price and not self.number_of_asteroids_to_do:
                     self.number_of_asteroids_to_do = random.randint(5, 10)
                     self.points = self.points - Asteroid.price
         elif event.type == KEYUP:
-            # if event.key in (K_LEFT, K_RIGHT):
             pressedKeys = pygame.key.get_pressed()
             if event.key == K_LEFT:
                 if not pressedKeys[K_RIGHT]:
@@ -155,10 +154,12 @@ class Game(State):
 
     def update(self, screen):
         screen.blit(self.background, (0, 0))
+        # falls das Spiel noch nicht zu Ende ist
         if not self.game_over:
             # AlienBullets generieren
             self.generate_alien_bullet()
 
+            # SpaceShips generieren
             self.generate_space_ship()
 
             self.update_asteroid_rain()
@@ -202,19 +203,16 @@ class Game(State):
 
             # Nach dem Erreichen eines Bereichs des linken bzw. des rechten Spielfeldrandes
             # werden die Reihen von Aliens um denselben Bereich nach unten verschoben
-            # und die Bewegungsrichtung wird geändert.
+            # und die Bewegungsrichtung wird geaendert.
             if Alien.goDown:
                 self.aliens.update(True)
                 self.generate_black_hole(screen)
             Alien.goDown = False
 
-            # Beim erreichen der Aliens des unteren screen Randes
+            # Beim Erreichen durch die Aliens des unteren screen Randes
             if Alien.capture:
                 self.canon.lifes -= 1
                 Alien.capture = False
-                # allSprites.remove(aliens.sprites())
-                # aliens.empty()
-                # Alien.capture = False
         # falls das Spiel zu Ende ist
         else:
             # falls der Spieler verloren hat
@@ -240,11 +238,8 @@ class Game(State):
             self.level_settings["new_level"] = False
             pygame.time.delay(1000)
 
-    # def draw(self, screen):
-    #     screen.fill((0, 0, 255))
-
+    # Sprite-Gruppen ersellen
     def create_sprite_groups(self):
-        # self.canons = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
         self.asteroiden = pygame.sprite.Group()
@@ -257,8 +252,9 @@ class Game(State):
         self.blackHoles = pygame.sprite.Group()
         self.fires = pygame.sprite.Group()
 
+    # Sprite-Klassen entsprechenden Sprite-Gruppen zuordnen
     def assign_sprite_groups(self):
-        Canon.groups = self.allSprites  #, self.canons
+        Canon.groups = self.allSprites
         Alien.groups = self.allSprites, self.aliens
         Bullet.groups = self.allSprites, self.bullets
         Asteroid.groups = self.allSprites, self.asteroiden
@@ -270,9 +266,8 @@ class Game(State):
         SpaceShip.groups = self.allSprites, self.space_ships
         Fire.groups = self.fires, self.allSprites
 
+    # Matrix mit Aliens erstellen
     def create_alien_matrix(self, degree_of_difficulty, alien_speed):
-        # anzahlAliensInReihe = schwierigkeitsgrad
-        # reihenAliens = schwierigkeitsgrad
 
         # Erste For Schleife definiert Anzahl der Aliens Reihen und zweite for Schleife die Anzhal der Alienschiffe in der Reihe
         alienMatrix = [[Alien(alien_speed) for x in range(degree_of_difficulty)] for y in range(degree_of_difficulty)]
@@ -284,6 +279,7 @@ class Game(State):
                 alienMatrix[i][j].rect.y = i * 50
         Alien.alienMatrix = alienMatrix
 
+    # Mauer erstellen
     def create_wall(self):
         y = 500
         x = 150
@@ -302,6 +298,7 @@ class Game(State):
             # Wall((x + (block_width + block_distance) * 2 + i * 10, y))
             # Wall((x + (block_width + block_distance) * 2 + i * 10, y + 10))
 
+    # Geschosse der Aliens generieren
     def generate_alien_bullet(self):
         # AlienBullets generieren
         self.counter_for_alien_bullets -= 1
@@ -313,6 +310,7 @@ class Game(State):
                 AlienBullet(shooting_alien.getPosition())
                 self.game_sounds[0].play()
 
+    # SpaceShips generieren
     def generate_space_ship(self):
         if self.aliens.sprites():
             self.counter_for_space_ships -= 1
@@ -320,18 +318,17 @@ class Game(State):
                 self.counter_for_space_ships = random.randint(200, 400)
                 SpaceShip(util.get_screen_rect().topright)
 
+    # schwarze Loecher generieren
     def generate_black_hole(self, screen):
         if self.aliens.sprites():
             shooting_alien = self.get_random_outer_aliens()
             shooting_alien_position = shooting_alien.getPosition()
-            # print(screen.get_height() / 1.6, screen.get_height() / 1.4, shooting_alien_position[1])
-            if screen.get_height() / 1.6 < shooting_alien_position[1] and screen.get_height() / 1.4 > \
-                    shooting_alien_position[1]:
-                # BlackHole(startPosition)
+            if screen.get_height() / 1.6 < shooting_alien_position[1] < screen.get_height() / 1.4:
                 self.game_sounds[3].play()
                 x = random.randint(0 + BlackHole.image.get_rect().width, screen.get_width())
                 BlackHole((x, 0))
 
+    # ein zufaelliges, aeusseres (unteres) Alien aus der Matrix bestimmen
     def get_random_outer_aliens(self):
         last_index = len(Alien.alienMatrix) - 1
         last_row = Alien.alienMatrix[last_index]
@@ -341,7 +338,7 @@ class Game(State):
         else:
             return None
 
-    # Generieren von Asteroidenregen
+    # Asteroidenregen generieren
     def update_asteroid_rain(self):
         if self.number_of_asteroids_to_do > 0:
             self.counter_for_asteroids -= 1
@@ -352,15 +349,14 @@ class Game(State):
                 self.game_sounds[5].play()
                 self.number_of_asteroids_to_do -= 1
 
+    # Kollisionen pruefen
     def check_collisions(self):
-        # for canon in pygame.sprite.groupcollide(self.canons, self.blackHoles, 1, 0).keys():
         for black_hole in pygame.sprite.spritecollide(self.canon, self.blackHoles, 0):
             self.game_sounds[1].play()
             self.game_sounds[4].play()
             self.canon.lifes = 0
             Fire(self.canon.rect.center)
 
-        # for canon in pygame.sprite.groupcollide(self.canons, self.asteroiden, 0, 1).keys():
         for asteroid in pygame.sprite.spritecollide(self.canon, self.asteroiden, 1):
             self.game_sounds[1].play()
             self.game_sounds[4].play()
@@ -402,7 +398,6 @@ class Game(State):
             self.game_sounds[1].play()
             Fire(alien.rect.center)
 
-        # for bullet in pygame.sprite.groupcollide(self.aliensBullets, self.canons, 1, 0).keys():
         for alien_bullet in pygame.sprite.spritecollide(self.canon, self.aliensBullets, 1):
             self.game_sounds[1].play()
             self.game_sounds[4].play()
@@ -426,8 +421,6 @@ class Game(State):
             self.points += alien_bullet.points
             Fire(alien_bullet.rect.center)
 
-        # /F30/ Wenn eine Reihe von Aliens einen unteren Bereich des Spielfeldes erreicht, verliert der Spieler eines seiner Leben.
-        # for alien in pygame.sprite.groupcollide(self.aliens, self.canons, 1, 0).keys():
         for alien in pygame.sprite.spritecollide(self.canon, self.aliens, 1):
             self.game_sounds[1].play()
             self.game_sounds[4].play()

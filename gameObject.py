@@ -1,6 +1,7 @@
 import pygame, util
 
 
+# Klasse zum Repraesentieren von Spielobjekten
 class GameObject(pygame.sprite.Sprite):
     image = None
 

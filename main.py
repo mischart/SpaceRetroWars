@@ -1,4 +1,3 @@
-# Import and Initialization
 import pygame, util
 from canon import Canon
 from alien import Alien
@@ -17,7 +16,8 @@ from instruction_window import InstructionWindow
 from fire import Fire
 
 
-
+# Klasse Control zur Implementierung eines Zustandsautomaten (State Pattern)
+# Auf der Basis der Quelle: http://python-gaming.com/pygame/docs/tuts/state_machine.html
 class Control:
     def __init__(self, screen_size):
         self.done = False
@@ -32,6 +32,7 @@ class Control:
         self.state = self.state_dict[self.state_name]
         self.state.startup()
 
+    # Zustand (Spiel-Fenster) wechseln
     def flip_state(self):
         self.state.done = False
         previous, self.state_name = self.state_name, self.state.next
@@ -40,6 +41,7 @@ class Control:
         self.state.startup()
         self.state.previous = previous
 
+    # Zustand und Anzeige aktualisieren
     def update(self):
         if self.state.quit:
             self.done = True
@@ -47,6 +49,7 @@ class Control:
             self.flip_state()
         self.state.update(self.screen)
 
+    # events ueberpruefen
     def event_loop(self):
         events = pygame.event.get()
         for event in events:
@@ -56,6 +59,7 @@ class Control:
         if self.state.active_text_input:
             self.state.get_events_to_text_input(events)
 
+    # Spiel-Schleife
     def main_game_loop(self):
         while not self.done:
             self.clock.tick(30)
@@ -64,10 +68,10 @@ class Control:
             pygame.display.flip()
 
 
+# Entities laden
 def init_game():
     pygame.init()
-    # load fonts
-    # TODO : change Lists to Dictionaries
+    # Fonts laden
     start_menu_fonts = []
     start_menu_fonts.append(pygame.font.SysFont('SPACEBOY', 56, False, False))
     start_menu_fonts.append(pygame.font.SysFont('Space Cruiser', 56, False, True))
@@ -83,7 +87,7 @@ def init_game():
 
     instruction_window_fonts = score_window_fonts
 
-    # load images
+    # images laden
     screen_size = (800, 600)
     start_menu_images = []
     start_menu_images.append(util.load_image("StartScreen.jpg", screen_size))  # Hintergrund
@@ -154,7 +158,7 @@ def init_game():
     Fire.images = [img, pygame.transform.flip(img, 1, 1)]
     Fire.image = Fire.images[0]
 
-    # sounds
+    # sounds laden
     game_sounds = []
     game_sounds.append(util.load_sound('bullet.wav'))
     game_sounds.append(util.load_sound('destruction.wav'))
@@ -172,11 +176,6 @@ def init_game():
         "game_over": util.load_sound('game_over.wav'),
     }
 
-    # Action -> Alter
-    # Assign Variables
-    # clock = pygame.time.Clock()
-    # start_window_loop(clock, screen, fonts, backgrounds, bulletSound, destructionSound)
-
     app = Control(screen_size)
     state_dict = {
         'start_menu': StartMenu(start_menu_images, start_menu_fonts),
@@ -188,6 +187,7 @@ def init_game():
     app.setup_states(state_dict, 'start_menu')
     app.main_game_loop()
     pygame.quit()
+
 
 if __name__ == '__main__':
     init_game()

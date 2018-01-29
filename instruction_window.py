@@ -4,6 +4,7 @@ from button import Button
 from state import State
 
 
+# Klasse zur Darstellung der Spielanleitung
 class InstructionWindow(State):
     def __init__(self, images, fonts):
         State.__init__(self)
