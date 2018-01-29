@@ -1,6 +1,6 @@
 import random
 from pygame.locals import *
-from gameObjects import *
+from game_objects import *
 from time import strftime
 from state import State
 from button import Button

@@ -1,5 +1,5 @@
 import pygame, util
-from gameObjects import *
+from game_objects import *
 from game import Game
 from start_menu import StartMenu
 from score_window import ScoreWindow

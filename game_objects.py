@@ -8,7 +8,7 @@ import pygame, util
 class GameObject(pygame.sprite.Sprite):
     image = None
 
-    def __init__(self, midbottom=None, topright=None, center=None):
+    def __init__(self, midbottom=None, topright=None, center=None, xy=None):
         pygame.sprite.Sprite.__init__(self, self.groups)
         if midbottom:
             self.rect = self.image.get_rect(midbottom=midbottom)
@@ -16,6 +16,8 @@ class GameObject(pygame.sprite.Sprite):
             self.rect = self.image.get_rect(topright=topright)
         elif center:
             self.rect = self.image.get_rect(center=center)
+        elif xy:
+            self.rect = self.image.get_rect(x=xy[0], y=xy[1])
         else:
             self.rect = self.image.get_rect()
         self.screenRect = util.get_screen_rect()
@@ -24,8 +26,8 @@ class GameObject(pygame.sprite.Sprite):
 # Klasse zum Repraesentieren der Spielobjekte
 # die sich bewegen koennen
 class DynamicGameObject(GameObject):
-    def __init__(self, speed, midbottom=None, topright=None, center=None):
-        GameObject.__init__(self, midbottom, topright, center)
+    def __init__(self, speed, midbottom=None, topright=None, center=None, xy=None):
+        GameObject.__init__(self, midbottom, topright, center, xy)
         self.speed = speed
 
     def update(self):
@@ -239,12 +241,8 @@ class SpaceShip(DynamicGameObject):
 
 # Klasse zum Repraesentieren der Bloecke
 class Wall(pygame.sprite.Sprite):
-    image = None
-
-    def __init__(self, position):
-        pygame.sprite.Sprite.__init__(self, self.groups)
-        self.image = Wall.image
-        self.rect = self.image.get_rect(x=position[0], y=position[1])
+    def __init__(self, xy):
+        GameObject.__init__(self, xy=xy)
 
 
 START_LIFES = 12
