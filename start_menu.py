@@ -62,7 +62,6 @@ class StartMenu(State):
         self.next = 'game'
 
     def startup(self):
-        # TODO checken, ob man die mp3-Datei schon früher (zusammen mit den anderen Sounds) laden kann
         pygame.mixer.music.load('data/Menue.mp3')
         pygame.mixer.music.play(-1)
         self.high_score = util.get_highscore_results()

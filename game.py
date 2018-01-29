@@ -46,7 +46,6 @@ class Game(State):
         self.set_buttons_to_unfocused(self.buttons)
 
     def startup(self):
-        # TODO checken, ob man die mp3-Datei schon früher (zusammen mit den anderen Sounds) laden kann
         pygame.mixer.music.load('data/game.mp3')
         pygame.mixer.music.play(-1)
         Bullet.image = self.game_images[4]
