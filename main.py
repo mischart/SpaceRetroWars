@@ -1,19 +1,9 @@
 import pygame, util
-from canon import Canon
-from alien import Alien
-from AlienBullet import AlienBullet
-from decastling import Decastling
-from bullet import Bullet
-from bomb import Bomb
-from asteroid import Asteroid
-from blackHole import BlackHole
-from wall import Wall
-from spaceShip import SpaceShip
+from gameObjects import *
 from game import Game
 from start_menu import StartMenu
 from score_window import ScoreWindow
 from instruction_window import InstructionWindow
-from fire import Fire
 
 
 # Klasse Control zur Implementierung eines Zustandsautomaten (State Pattern)

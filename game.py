@@ -1,19 +1,9 @@
-import pygame, util, random
+import random
 from pygame.locals import *
-from alien import Alien
-from AlienBullet import AlienBullet
-from decastling import Decastling
-from bomb import Bomb
-from bullet import Bullet
-from asteroid import Asteroid
-from blackHole import BlackHole
-from canon import Canon
-from wall import Wall
-from spaceShip import SpaceShip
+from gameObjects import *
 from time import strftime
 from state import State
 from button import Button
-from fire import Fire
 
 LEVEL_COUNTER = 30
 
@@ -210,8 +200,10 @@ class Game(State):
                 self.__generate_black_hole(screen)
             Alien.goDown = False
 
-            # Beim Erreichen durch die Aliens des unteren screen Randes
+            # Beim Erreichen durch ein Alien des unteren screen Randes
+            # verliert der Spieler ein Leben
             if Alien.capture:
+                self.game_sounds[4].play()
                 self.canon.lifes -= 1
                 Alien.capture = False
         # falls das Spiel zu Ende ist
