@@ -55,7 +55,6 @@ class Control:
             self.clock.tick(30)
             self.__event_loop()
             self.__update()
-            pygame.display.flip()
 
 
 # Entities laden

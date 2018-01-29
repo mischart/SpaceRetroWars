@@ -161,7 +161,7 @@ DECASTLING_SPEED = -50
 
 # Klasse zum Repraesentieren von Decastling
 class Decastling(DynamicGameObject):
-    price = 3
+    price = 4
 
     def __init__(self, midbottom):
         DynamicGameObject.__init__(self, DECASTLING_SPEED, midbottom=midbottom)
@@ -196,7 +196,7 @@ ASTEROID_SPEED = 8
 
 # Klasse zum Repraesentieren der Asteroiden
 class Asteroid(DynamicGameObject):
-    price = 4
+    price = 3
 
     def __init__(self, position):
         DynamicGameObject.__init__(self, ASTEROID_SPEED, topright=position)

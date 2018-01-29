@@ -1,5 +1,7 @@
 import pygame
 
+ERROR_TEXT = "Subclasses should have implemented this"
+
 
 # Klasse State zur Implementierung eines Zustandsautomaten (State Pattern)
 # Auf der Basis der Quelle: http://python-gaming.com/pygame/docs/tuts/state_machine.html
@@ -19,6 +21,18 @@ class State(object):
         self.quit = False
         self.previous = None
         self.active_text_input = False
+
+    def cleanup(self):
+        raise NotImplementedError(ERROR_TEXT)
+
+    def startup(self):
+        raise NotImplementedError(ERROR_TEXT)
+
+    def get_event(self, event):
+        raise NotImplementedError(ERROR_TEXT)
+
+    def update(self, screen):
+        raise NotImplementedError(ERROR_TEXT)
 
     @staticmethod
     def set_buttons_to_unfocused(buttons):

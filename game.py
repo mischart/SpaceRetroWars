@@ -337,8 +337,8 @@ class Game(State):
             self.counter_for_asteroids -= 1
             if self.counter_for_asteroids <= 0:
                 self.counter_for_asteroids = random.randint(0, 30)
-                x = random.randint(0, 800 - Asteroid.image.get_rect().width)
-                Asteroid([x, 0])
+                x = random.randint(0 + Asteroid.image.get_rect().width, 800)
+                Asteroid((x, 0))
                 self.game_sounds[5].play()
                 self.number_of_asteroids_to_do -= 1
 

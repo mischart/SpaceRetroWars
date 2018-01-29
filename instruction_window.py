@@ -56,17 +56,17 @@ class InstructionWindow(State):
 
         y += distance_y
         text1 = "Taste A"
-        text2 = "Asteroidenregen (Punktabzug)"
+        text2 = "Asteroidenregen (Preis: 3 Pkt.)"
         self.__blit_text_line(screen, font, x, y, distance_x, text1, text2)
 
         y += distance_y
         text1 = "Taste S"
-        text2 = "Bombe (Punktabzug)"
+        text2 = "Bombe (Preis: 2 Pkt.)"
         self.__blit_text_line(screen, font, x, y, distance_x, text1, text2)
 
         y += distance_y
         text1 = "Taste D"
-        text2 = "Decastling (Punktabzug)"
+        text2 = "Decastling (Preis: 4 Pkt.)"
         self.__blit_text_line(screen, font, x, y, distance_x, text1, text2)
 
         y += distance_y
@@ -95,6 +95,7 @@ class InstructionWindow(State):
         pygame.draw.rect(screen, pygame.Color('Black'), self.bottom_menu_box)
         self.buttons.update()
         self.buttons.draw(screen)
+        pygame.display.flip()
 
     @staticmethod
     def __blit_text_line(screen, font, x, y, distance_x, text1=None, text2=None):

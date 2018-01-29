@@ -43,6 +43,7 @@ class ScoreWindow(State):
         pygame.draw.rect(screen, pygame.Color('Black'), self.bottom_menu_box)
         self.buttons.update()
         self.buttons.draw(screen)
+        pygame.display.flip()
 
     # Highscore Anzeige
     def __show_high_score(self):
