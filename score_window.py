@@ -4,6 +4,7 @@ from button import Button
 from state import State
 
 
+# Klasse zur Darstellung der besten Ergebnisse
 class ScoreWindow(State):
     def __init__(self, images, fonts):
         State.__init__(self)
@@ -27,7 +28,7 @@ class ScoreWindow(State):
         screen.blit(self.background, (0, 0))
         high_score_text = self.fonts[0].render('HIGHSCORE', True, Color('White'))
         screen.blit(high_score_text, (175, 10))
-        self.show_high_score()
+        self.__show_high_score()
         pygame.draw.rect(screen, pygame.Color('Black'), self.bottom_menu_box)
 
     def get_event(self, event):
@@ -42,9 +43,10 @@ class ScoreWindow(State):
         pygame.draw.rect(screen, pygame.Color('Black'), self.bottom_menu_box)
         self.buttons.update()
         self.buttons.draw(screen)
+        pygame.display.flip()
 
     # Highscore Anzeige
-    def show_high_score(self):
+    def __show_high_score(self):
         default_font = pygame.font.Font(None, 40)
 
         # Highscore Überschrift
@@ -59,16 +61,16 @@ class ScoreWindow(State):
         start_y = 100
         screen = pygame.display.get_surface()
 
-        # erste Spalte
+        # erste Spalte der Anzeige
         x_y_of_points_row = (start_x, start_y)
         screen.blit(point_title, x_y_of_points_row)
 
-        # zweite Spalte
+        # zweite Spalte der Anzeige
         x = start_x + width_of_point_title + distance_between_columns
         x_y_of_date_row = (x, start_y)
         screen.blit(date_title, x_y_of_date_row)
 
-        # dritte Spalte
+        # dritte Spalte der Anzeige
         x += distance_between_columns + width_of_date_title
         x_y_of_name_row = (x, start_y)
         screen.blit(name_title, x_y_of_name_row)

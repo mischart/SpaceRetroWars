@@ -1,21 +1,13 @@
-# Import and Initialization
 import pygame, util
-from alien import Alien
-from AlienBullet import AlienBullet
-from decastling import Decastling
-from bullet import Bullet
-from bomb import Bomb
-from asteroid import Asteroid
-from blackHole import BlackHole
-from wall import Wall
-from spaceShip import SpaceShip
+from game_objects import *
 from game import Game
 from start_menu import StartMenu
 from score_window import ScoreWindow
 from instruction_window import InstructionWindow
 
 
-
+# Klasse Control zur Implementierung eines Zustandsautomaten (State Pattern)
+# Auf der Basis der Quelle: http://python-gaming.com/pygame/docs/tuts/state_machine.html
 class Control:
     def __init__(self, screen_size):
         self.done = False
@@ -30,7 +22,8 @@ class Control:
         self.state = self.state_dict[self.state_name]
         self.state.startup()
 
-    def flip_state(self):
+    # Zustand (Spiel-Fenster) wechseln
+    def __flip_state(self):
         self.state.done = False
         previous, self.state_name = self.state_name, self.state.next
         self.state.cleanup()
@@ -38,14 +31,16 @@ class Control:
         self.state.startup()
         self.state.previous = previous
 
-    def update(self):
+    # Zustand und Anzeige aktualisieren
+    def __update(self):
         if self.state.quit:
             self.done = True
         elif self.state.done:
-            self.flip_state()
+            self.__flip_state()
         self.state.update(self.screen)
 
-    def event_loop(self):
+    # events ueberpruefen
+    def __event_loop(self):
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
@@ -54,18 +49,18 @@ class Control:
         if self.state.active_text_input:
             self.state.get_events_to_text_input(events)
 
+    # Spiel-Schleife
     def main_game_loop(self):
         while not self.done:
             self.clock.tick(30)
-            self.event_loop()
-            self.update()
-            pygame.display.flip()
+            self.__event_loop()
+            self.__update()
 
 
+# Entities laden
 def init_game():
     pygame.init()
-    # load fonts
-    # TODO : change Lists to Dictionaries
+    # Fonts laden
     start_menu_fonts = []
     start_menu_fonts.append(pygame.font.SysFont('SPACEBOY', 56, False, False))
     start_menu_fonts.append(pygame.font.SysFont('Space Cruiser', 56, False, True))
@@ -81,7 +76,7 @@ def init_game():
 
     instruction_window_fonts = score_window_fonts
 
-    # load images
+    # images laden
     screen_size = (800, 600)
     start_menu_images = []
     start_menu_images.append(util.load_image("StartScreen.jpg", screen_size))  # Hintergrund
@@ -109,17 +104,20 @@ def init_game():
     game_images.append(util.load_image("EndScreen.jpeg", screen_size))  # Hintergrund
     game_images.append(util.load_image('YouWon.png', (75, 100)))
     game_images.append(util.load_image('GameScreen_2.jpg', screen_size))
+    game_images.append(util.load_image('bullet.png', (10, 10)))
+    game_images.append(util.load_image('button_back.png', (60, 20)))
+    game_images.append(util.load_image('button_back.png', (90, 30)))
 
     score_window_images = []
     score_window_images.append(game_images[3])
-    score_window_images.append(util.load_image('button_back.png', (60, 20)))
-    score_window_images.append(util.load_image('button_back.png', (90, 30)))
+    score_window_images.append(game_images[5])
+    score_window_images.append(game_images[6])
 
     instruction_window_images = score_window_images
 
-    img = util.load_image('bullet.png', (10, 10))
-    Bullet.image = img
-    game_images.append(img)
+    Canon.image = util.load_image('player.png', (50, 50))
+
+    Bullet.image = game_images[4]
 
     img = util.load_image('Asteroid.png', (25, 25))
     Asteroid.image = img
@@ -133,7 +131,7 @@ def init_game():
     img = util.load_image('blackHole.png', (50, 50))
     BlackHole.image = img
 
-    img = util.load_image('Cute-spaceship-clipart-2.png', (50, 50))
+    img = util.load_image('alien.png', (50, 50))
     Alien.image = img
 
     img = util.load_image('wall.jpg', (10, 10))
@@ -145,22 +143,32 @@ def init_game():
     img = util.load_image('Railgun.png', (10, 50))
     Decastling.image = img
 
-    # sounds
+    img = util.load_image('fire.png', (50, 50))
+    Fire.images = [img, pygame.transform.flip(img, 1, 1)]
+    Fire.image = Fire.images[0]
+
+    # sounds laden
     game_sounds = []
     game_sounds.append(util.load_sound('bullet.wav'))
     game_sounds.append(util.load_sound('destruction.wav'))
     game_sounds.append(util.load_sound('Railgun.wav'))
     game_sounds.append(util.load_sound('blackHole.wav'))
+    game_sounds.append(util.load_sound('alarm.wav'))
+    game_sounds.append(util.load_sound('asteroid.wav'))
 
-    # Action -> Alter
-    # Assign Variables
-    # clock = pygame.time.Clock()
-    # start_window_loop(clock, screen, fonts, backgrounds, bulletSound, destructionSound)
+    spoken_words = {
+        1: util.load_sound('round_1.wav'),
+        2: util.load_sound('round_2.wav'),
+        3: util.load_sound('round_3.wav'),
+        "mission_completed": util.load_sound('mission_completed.wav'),
+        "winner": util.load_sound('winner.wav'),
+        "game_over": util.load_sound('game_over.wav'),
+    }
 
     app = Control(screen_size)
     state_dict = {
         'start_menu': StartMenu(start_menu_images, start_menu_fonts),
-        'game': Game(game_images, game_sounds, game_fonts),
+        'game': Game(game_images, game_sounds, game_fonts, spoken_words),
         'score_window': ScoreWindow(score_window_images, score_window_fonts),
         'instruction_window': InstructionWindow(instruction_window_images, instruction_window_fonts)
     }
