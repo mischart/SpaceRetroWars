@@ -149,6 +149,3 @@ class StartMenu(State):
         self.buttons.update()
         self.buttons.draw(screen)
         pygame.display.flip()
-
-    def draw(self, screen):
-        pass

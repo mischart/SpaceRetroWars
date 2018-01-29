@@ -33,7 +33,7 @@ class Control:
         self.state.startup()
 
     # Zustand (Spiel-Fenster) wechseln
-    def flip_state(self):
+    def __flip_state(self):
         self.state.done = False
         previous, self.state_name = self.state_name, self.state.next
         self.state.cleanup()
@@ -42,15 +42,15 @@ class Control:
         self.state.previous = previous
 
     # Zustand und Anzeige aktualisieren
-    def update(self):
+    def __update(self):
         if self.state.quit:
             self.done = True
         elif self.state.done:
-            self.flip_state()
+            self.__flip_state()
         self.state.update(self.screen)
 
     # events ueberpruefen
-    def event_loop(self):
+    def __event_loop(self):
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
@@ -63,8 +63,8 @@ class Control:
     def main_game_loop(self):
         while not self.done:
             self.clock.tick(30)
-            self.event_loop()
-            self.update()
+            self.__event_loop()
+            self.__update()
             pygame.display.flip()
 
 

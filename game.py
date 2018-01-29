@@ -27,8 +27,8 @@ class Game(State):
         self.game_sounds = game_sounds
         self.game_fonts = game_fonts
         self.spoken_words = spoken_words
-        self.create_sprite_groups()
-        self.assign_sprite_groups()
+        self.__create_sprite_groups()
+        self.__assign_sprite_groups()
         self.buttons = pygame.sprite.Group()
         self.game_over_text = self.game_fonts[0].render('Game Over', True, Color('White'))
         self.you_won_text = self.game_fonts[0].render('You Won', True, Color('White'))
@@ -49,7 +49,7 @@ class Game(State):
 
     def cleanup(self):
         pygame.mixer.music.stop()
-        self.empty_sprite_groups()
+        self.__empty_sprite_groups()
         self.fires.empty()
         self.walls.empty()
         self.allSprites.empty()
@@ -70,23 +70,23 @@ class Game(State):
         self.game_over = False
         self.level_settings["current_level"] = 1
         self.level_settings["next_level_counter"] = LEVEL_COUNTER
-        self.initialize_level()
+        self.__initialize_level()
 
     # Level initialisieren
-    def initialize_level(self):
+    def __initialize_level(self):
         self.level_settings["new_level"] = True
         level = self.level_settings["current_level"]
         bullet_counter = self.level_settings[level]["bullet_counter"]
         self.counter_for_alien_bullets = bullet_counter
         self.counter_for_space_ships = random.randint(200, 400)
         alien_speed = self.level_settings[level]["alien_speed"]
-        self.create_alien_matrix(State.game_settings['degree_of_difficulty'], alien_speed)
-        self.create_wall()
+        self.__create_alien_matrix(State.game_settings['degree_of_difficulty'], alien_speed)
+        self.__create_wall()
         self.number_of_asteroids_to_do = 0
         self.counter_for_asteroids = 0
         self.spoken_words[level].play()
 
-    def empty_sprite_groups(self):
+    def __empty_sprite_groups(self):
         self.allSprites.remove(self.aliens)
         self.aliens.empty()
         self.allSprites.remove(self.bullets)
@@ -157,15 +157,16 @@ class Game(State):
         # falls das Spiel noch nicht zu Ende ist
         if not self.game_over:
             # AlienBullets generieren
-            self.generate_alien_bullet()
+            self.__generate_alien_bullet()
 
             # SpaceShips generieren
-            self.generate_space_ship()
+            self.__generate_space_ship()
 
-            self.update_asteroid_rain()
+            # Asteroiden generieren
+            self.__update_asteroid_rain()
 
-            # Collisions
-            self.check_collisions()
+            # Kollisionen ueberpruefen
+            self.__check_collisions()
 
             # /F80/ Während des Spiels muss die Anzahl der Leben des Spielers sowie die Anzahl der erreichten Punkte dargestellt werden.
             punkteText = self.game_fonts[1].render('Punkte: ' + str(self.points), True, Color('White'))
@@ -180,18 +181,18 @@ class Game(State):
                 if self.level_settings["current_level"] < 3:
                     if self.level_settings["next_level_counter"] == LEVEL_COUNTER:
                         self.spoken_words["mission_completed"].play()
-                        self.empty_sprite_groups()
+                        self.__empty_sprite_groups()
                     self.level_settings["next_level_counter"] -= 1
                     if self.level_settings["next_level_counter"] < 1:
                         self.level_settings["next_level_counter"] = LEVEL_COUNTER
                         self.level_settings["current_level"] += 1
-                        self.empty_sprite_groups()
-                        self.initialize_level()
+                        self.__empty_sprite_groups()
+                        self.__initialize_level()
                 else:
                     self.spoken_words["winner"].play()
                     self.background = self.game_images[1]
                     Bullet.image = self.game_images[2]
-                    self.empty_sprite_groups()
+                    self.__empty_sprite_groups()
                     # Punkte mit Leben multiplizieren
                     result = str(self.points * self.canon.lifes)
                     # Ergebnis, Datum und Spielername in der DB speichern
@@ -206,7 +207,7 @@ class Game(State):
             # und die Bewegungsrichtung wird geaendert.
             if Alien.goDown:
                 self.aliens.update(True)
-                self.generate_black_hole(screen)
+                self.__generate_black_hole(screen)
             Alien.goDown = False
 
             # Beim Erreichen durch die Aliens des unteren screen Randes
@@ -239,7 +240,7 @@ class Game(State):
             pygame.time.delay(1000)
 
     # Sprite-Gruppen ersellen
-    def create_sprite_groups(self):
+    def __create_sprite_groups(self):
         self.aliens = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
         self.asteroiden = pygame.sprite.Group()
@@ -253,7 +254,7 @@ class Game(State):
         self.fires = pygame.sprite.Group()
 
     # Sprite-Klassen entsprechenden Sprite-Gruppen zuordnen
-    def assign_sprite_groups(self):
+    def __assign_sprite_groups(self):
         Canon.groups = self.allSprites
         Alien.groups = self.allSprites, self.aliens
         Bullet.groups = self.allSprites, self.bullets
@@ -267,7 +268,7 @@ class Game(State):
         Fire.groups = self.fires, self.allSprites
 
     # Matrix mit Aliens erstellen
-    def create_alien_matrix(self, degree_of_difficulty, alien_speed):
+    def __create_alien_matrix(self, degree_of_difficulty, alien_speed):
 
         # Erste For Schleife definiert Anzahl der Aliens Reihen und zweite for Schleife die Anzhal der Alienschiffe in der Reihe
         alienMatrix = [[Alien(alien_speed) for x in range(degree_of_difficulty)] for y in range(degree_of_difficulty)]
@@ -280,7 +281,7 @@ class Game(State):
         Alien.alienMatrix = alienMatrix
 
     # Mauer erstellen
-    def create_wall(self):
+    def __create_wall(self):
         y = 500
         x = 150
         block_width = 70
@@ -299,19 +300,19 @@ class Game(State):
             # Wall((x + (block_width + block_distance) * 2 + i * 10, y + 10))
 
     # Geschosse der Aliens generieren
-    def generate_alien_bullet(self):
+    def __generate_alien_bullet(self):
         # AlienBullets generieren
         self.counter_for_alien_bullets -= 1
         if self.counter_for_alien_bullets == 0:
             level = self.level_settings["current_level"]
             self.counter_for_alien_bullets = self.level_settings[level]["bullet_counter"]
-            shooting_alien = self.get_random_outer_aliens()
+            shooting_alien = self.__get_random_outer_aliens()
             if shooting_alien:
                 AlienBullet(shooting_alien.getPosition())
                 self.game_sounds[0].play()
 
     # SpaceShips generieren
-    def generate_space_ship(self):
+    def __generate_space_ship(self):
         if self.aliens.sprites():
             self.counter_for_space_ships -= 1
             if self.counter_for_space_ships == 0:
@@ -319,9 +320,9 @@ class Game(State):
                 SpaceShip(util.get_screen_rect().topright)
 
     # schwarze Loecher generieren
-    def generate_black_hole(self, screen):
+    def __generate_black_hole(self, screen):
         if self.aliens.sprites():
-            shooting_alien = self.get_random_outer_aliens()
+            shooting_alien = self.__get_random_outer_aliens()
             shooting_alien_position = shooting_alien.getPosition()
             if screen.get_height() / 1.6 < shooting_alien_position[1] < screen.get_height() / 1.4:
                 self.game_sounds[3].play()
@@ -329,7 +330,7 @@ class Game(State):
                 BlackHole((x, 0))
 
     # ein zufaelliges, aeusseres (unteres) Alien aus der Matrix bestimmen
-    def get_random_outer_aliens(self):
+    def __get_random_outer_aliens(self):
         last_index = len(Alien.alienMatrix) - 1
         last_row = Alien.alienMatrix[last_index]
         last_row = list(filter(lambda x: x is not None, last_row))
@@ -339,7 +340,7 @@ class Game(State):
             return None
 
     # Asteroidenregen generieren
-    def update_asteroid_rain(self):
+    def __update_asteroid_rain(self):
         if self.number_of_asteroids_to_do > 0:
             self.counter_for_asteroids -= 1
             if self.counter_for_asteroids <= 0:
@@ -350,7 +351,7 @@ class Game(State):
                 self.number_of_asteroids_to_do -= 1
 
     # Kollisionen pruefen
-    def check_collisions(self):
+    def __check_collisions(self):
         for black_hole in pygame.sprite.spritecollide(self.canon, self.blackHoles, 0):
             self.game_sounds[1].play()
             self.game_sounds[4].play()

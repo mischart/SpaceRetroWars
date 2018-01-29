@@ -28,7 +28,7 @@ class ScoreWindow(State):
         screen.blit(self.background, (0, 0))
         high_score_text = self.fonts[0].render('HIGHSCORE', True, Color('White'))
         screen.blit(high_score_text, (175, 10))
-        self.show_high_score()
+        self.__show_high_score()
         pygame.draw.rect(screen, pygame.Color('Black'), self.bottom_menu_box)
 
     def get_event(self, event):
@@ -45,7 +45,7 @@ class ScoreWindow(State):
         self.buttons.draw(screen)
 
     # Highscore Anzeige
-    def show_high_score(self):
+    def __show_high_score(self):
         default_font = pygame.font.Font(None, 40)
 
         # Highscore Überschrift

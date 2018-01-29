@@ -37,19 +37,19 @@ class Alien(dynamicGameObject.DynamicGameObject):
             for j in range(len(Alien.alienMatrix[i])):
                 if self is Alien.alienMatrix[i][j]:
                     # Matrix-Elemente, die eliminierte Aliens darstellen verschieben
-                    Alien.move_matrixitem_to_initial_row(i, j)
+                    Alien.__move_matrixitem_to_initial_row(i, j)
                     break
         pygame.sprite.Sprite.kill(self)
 
     # Methode zum Verschieben von Matrix-Elementen
     @classmethod
-    def move_matrixitem_to_initial_row(cls, item_row, item_column):
+    def __move_matrixitem_to_initial_row(cls, item_row, item_column):
         if item_row > 0:
             item_in_lower_row = Alien.alienMatrix[item_row - 1][item_column]
             if item_in_lower_row:
                 Alien.alienMatrix[item_row][item_column] = item_in_lower_row
                 Alien.alienMatrix[item_row - 1][item_column] = None
-                Alien.move_matrixitem_to_initial_row(item_row - 1, item_column)
+                Alien.__move_matrixitem_to_initial_row(item_row - 1, item_column)
             else:
                 Alien.alienMatrix[item_row][item_column] = None
         else:
