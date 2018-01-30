@@ -240,7 +240,7 @@ class SpaceShip(DynamicGameObject):
 # /F60/ Über der Kanone müssen sich Blöcke befinden, hinter denen sich die Kanone verstecken kann.
 
 # Klasse zum Repraesentieren der Bloecke
-class Wall(pygame.sprite.Sprite):
+class Wall(GameObject):
     def __init__(self, xy):
         GameObject.__init__(self, xy=xy)
 
