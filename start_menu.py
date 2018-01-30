@@ -31,16 +31,16 @@ class StartMenu(State):
 
         self.play_box = pygame.Rect(self.bg_box.x, self.bg_box.y + 190, 300, 130)
         self.play_text = default_font.render('Spiel starten:', True, Color('Cyan'))
-        self.difficulty_5x5_button = Button((images[7], images[8]), (self.play_box.x + 20, self.play_box.y + 20))
-        self.difficulty_6x6_button = Button((images[9], images[10]), (self.play_box.x + 115, self.play_box.y + 20))
-        self.difficulty_7x7_button = Button((images[11], images[12]), (self.play_box.x + 210, self.play_box.y + 20))
+        self.difficulty_5x5_button = Button((images[5], images[6]), (self.play_box.x + 20, self.play_box.y + 20))
+        self.difficulty_6x6_button = Button((images[7], images[8]), (self.play_box.x + 115, self.play_box.y + 20))
+        self.difficulty_7x7_button = Button((images[9], images[10]), (self.play_box.x + 210, self.play_box.y + 20))
 
         screen_size = pygame.display.get_surface().get_size()
-        self.quit_button = Button((images[15], images[16]),
+        self.quit_button = Button((images[13], images[14]),
                                   (screen_size[0] - 120, screen_size[1] - self.y_for_bottom_buttons))
-        self.the_bests_button = Button((images[13], images[14]),
+        self.the_bests_button = Button((images[11], images[12]),
                                        (screen_size[0] - 270, screen_size[1] - self.y_for_bottom_buttons))
-        self.instruction_button = Button((images[17], images[18]),
+        self.instruction_button = Button((images[15], images[16]),
                                          (screen_size[0] - 405, screen_size[1] - self.y_for_bottom_buttons + 2))
 
     def cleanup(self):

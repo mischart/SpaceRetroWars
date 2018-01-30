@@ -79,13 +79,11 @@ def init_game():
     # images laden
     screen_size = (800, 600)
     start_menu_images = []
-    start_menu_images.append(util.load_image("StartScreen.jpg", screen_size))  # Hintergrund
+    start_menu_images.append(util.load_image("GameScreen.jpg", screen_size))  # Hintergrund
     start_menu_images.append(util.load_image("GameScreen.jpg", (60, 60)))
     start_menu_images.append(util.load_image("GameScreen.jpg", (90, 90)))
     start_menu_images.append(util.load_image('GameScreen_2.jpg', (60, 60)))
     start_menu_images.append(util.load_image('GameScreen_2.jpg', (90, 90)))
-    start_menu_images.append(util.load_image('Play.png', (60, 60)))
-    start_menu_images.append(util.load_image('Play.png', (90, 90)))
     start_menu_images.append(util.load_image('5x5.png', (60, 60)))
     start_menu_images.append(util.load_image('5x5.png', (90, 90)))
     start_menu_images.append(util.load_image('6x6.png', (60, 60)))
