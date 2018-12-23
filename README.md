@@ -1,10 +1,10 @@
 # SpaceRetroWars
 
-Gruppe:	Oleg Kossjak, Artur Nowodworski
-Framework:	PyGame
+## Gruppe:	Oleg Kossjak, Artur Nowodworski
+## Framework:	PyGame
 
-Funktionale Anforderungen
-a) Kern-Anforderungen (verbindlich)
+## Funktionale Anforderungen
+### a) Kern-Anforderungen (verbindlich)
 
 /F10/ Vor dem Spielbeginn muss dem Spieler gewährleistet werden, eine von mindestens zwei Spielumgebungen auszuwählen.
 
@@ -24,7 +24,7 @@ a) Kern-Anforderungen (verbindlich)
 
 /F90/ Es muss möglich sein, die Liste der besten Spielergebnisse aufzurufen (lokal).
 
-b) Nice-to-have – Anforderungen (fakultativ)
+### b) Nice-to-have – Anforderungen (fakultativ)
 
 /F100/ Auf dem Spielfeld können sich schwarze Löcher befinden können. Befindet sich ein Alien an der Stelle eines schwarzen Loches, dann verschwindet er für eine gewisse Zeit, sodass man ihn nicht eliminieren kann.
 
@@ -35,3 +35,7 @@ b) Nice-to-have – Anforderungen (fakultativ)
 /F140/ Es kann möglich sein, durch die Wahl der Anzahl der Aliens z.B. 5x5, 6x6, 7x7 (Reihen x Spalten) den Schwierigkeitsgrad festzulegen.
 
 /F150/ Der Spieler kann einen Asteroidenregen, der Aliens aber auch die Kanone eliminieren kann, hervorrufen.
+
+## Klassendiagramm
+
+![alt text](https://github.com/mischart/SpaceRetroWars/blob/master/Klassendiagramm.PNG "Klassendiagramm")
