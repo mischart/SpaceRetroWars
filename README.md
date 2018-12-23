@@ -1,5 +1,7 @@
 # SpaceRetroWars
 
+![alt text](https://github.com/mischart/SpaceRetroWars/blob/master/gameScreenshot.jpg "game screen shot")
+
 ## Gruppe:	Oleg Kossjak, Artur Nowodworski
 ## Framework:	PyGame
 
