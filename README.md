@@ -1,7 +1,7 @@
 # SpaceRetroWars
 
 ## Projektbeschreibung
-Ein Spiel, das im Rahmen der Lehrveranstaltung *Objektorientierte Skriptsprachen*  entwickelt wurde. Das Spielgrundkonzept basiert auf dem Spiel Space Invaders. Die Anwendung wurde als Gruppenarbeit von Oleg Kossjak und Artur Nowodworski entwickelt. 
+Ein Spiel, das im Rahmen der Lehrveranstaltung *Objektorientierte Skriptsprachen*  entwickelt wurde. Das Spielgrundkonzept basiert auf dem Spiel *Space Invaders*. Die Anwendung wurde als Gruppenarbeit von Oleg Kossjak und Artur Nowodworski entwickelt. 
 Das Wechseln zwischen mehreren Spielansichten (Hauptmenü, Spiel, Highscore, Spielanleitung) wurde mit einem Zustandsautomaten realisiert.
 
 ## Technologien
