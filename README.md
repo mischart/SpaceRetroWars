@@ -1,10 +1,11 @@
 # SpaceRetroWars
-## Projektbeschreibung
-## Screenshot
-![alt text](https://github.com/mischart/SpaceRetroWars/blob/master/gameScreenshot.jpg "game screen shot")
 
-## Gruppe:	Oleg Kossjak, Artur Nowodworski
-## Framework:	PyGame
+## Projektbeschreibung
+Ein Spiel, das im Rahmen der Lehrveranstaltung *Objektorientierte Skriptsprachen*  entwickelt wurde. Das Spielgrundkonzept basiert auf dem Spiel Space Invaders. Die Anwendung wurde als Gruppenarbeit von Oleg Kossjak und Artur Nowodworski entwickelt. 
+Das Wechseln zwischen mehreren Spielansichten (Hauptmenü, Spiel, Highscore, Spielanleitung) wurde mit einem Zustandsautomaten realisiert.
+
+## Technologien
+Python, PyGame, SQLite3
 
 ## Funktionale Anforderungen
 ### a) Kern-Anforderungen (verbindlich)
@@ -40,5 +41,7 @@
 /F150/ Der Spieler kann einen Asteroidenregen, der Aliens aber auch die Kanone eliminieren kann, hervorrufen.
 
 ## Klassendiagramm
-
 ![alt text](https://github.com/mischart/SpaceRetroWars/blob/master/Klassendiagramm.PNG "Klassendiagramm")
+
+## Screenshot
+![alt text](https://github.com/mischart/SpaceRetroWars/blob/master/gameScreenshot.jpg "game screen shot")
